@@ -259,6 +259,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
 <script>
 const OA = 'https://api.openalex.org';
+// OpenAlex "polite pool": including a contact mailto gets faster, more reliable
+// service and keeps anonymous requests off the throttled common pool.
+const POLITE_MAILTO = 'asrarsaa@gmail.com';
 // The social-science & management lens — OpenAlex level-0 concepts (verified ids).
 const LENS = [
   { id:'C15744967', name:'Psychology' },
@@ -281,7 +284,7 @@ const $ = s => document.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num = n => (typeof n==='number'?n.toLocaleString():'—');
 const shortId = u => { const m=String(u||'').match(/[A-Z]\d+$/); return m?m[0]:u; };
-async function getJSON(url){ const r = await fetch(url,{headers:{Accept:'application/json'}}); if(!r.ok) throw new Error('OpenAlex '+r.status); return r.json(); }
+async function getJSON(url){ const u = url + (url.includes('?')?'&':'?') + 'mailto=' + encodeURIComponent(POLITE_MAILTO); const r = await fetch(u,{headers:{Accept:'application/json'}}); if(!r.ok) throw new Error('OpenAlex '+r.status); return r.json(); }
 function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
 
 /* ── Theme (shared with the suite via localStorage 'syed-theme') ── */
