@@ -143,6 +143,24 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .m-link:hover{border-color:var(--violet);color:var(--ink);}
 .m-link.grad{background:var(--grad);color:#fff;border-color:transparent;}
 
+/* ── World map ─────────────────────────────────────────────── */
+#mapArea{margin-top:18px;}
+.map-svg{display:block;width:100%;height:auto;max-width:980px;margin:0 auto;}
+.geo-sphere{fill:color-mix(in srgb,var(--violet) 5%,var(--paper-2));stroke:var(--line);stroke-width:.5;}
+.geo-graticule{fill:none;stroke:var(--line-soft);stroke-width:.4;}
+.geo-country{fill:var(--paper-3);stroke:var(--line);stroke-width:.4;}
+.map-dot{stroke:var(--paper);stroke-width:1;opacity:.85;cursor:pointer;transition:opacity .12s,stroke .12s;}
+.map-dot:hover{opacity:1;stroke:var(--ink);stroke-width:1.4;}
+.map-tip{position:fixed;z-index:200;display:none;pointer-events:none;background:var(--ink);color:var(--paper);font-size:.78rem;line-height:1.4;padding:7px 11px;border-radius:9px;box-shadow:var(--shadow-sm);max-width:250px;}
+.map-tip b{font-weight:700;}
+.map-loading{padding:48px 0;text-align:center;color:var(--ink-faint);}
+.map-countries{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px auto 0;max-width:980px;}
+.mc-label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+.mc-chip{font-size:.78rem;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;}
+.mc-chip b{color:var(--magenta);font-family:'IBM Plex Mono',monospace;}
+.map-scale{display:flex;align-items:center;gap:8px;margin:12px auto 0;max-width:980px;font-size:.74rem;color:var(--ink-faint);}
+.map-scale .dot{display:inline-block;border-radius:50%;background:var(--magenta);opacity:.85;}
+
 /* ── Footer ────────────────────────────────────────────────── */
 .foot{margin:48px 0 30px;padding-top:18px;border-top:1px solid var(--line);font-size:.78rem;color:var(--ink-faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .foot a{color:var(--ink-soft);font-weight:600;}
@@ -175,6 +193,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
     <div class="row" style="justify-content:space-between">
       <div class="seg" id="modeSeg">
         <button data-mode="leaders" class="on">🏆 Leaders</button>
+        <button data-mode="map">🗺 Map</button>
         <button data-mode="search">🔎 Search</button>
       </div>
       <div class="seg" id="kindSeg">
@@ -210,6 +229,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   <div id="status"></div>
   <div id="leadHead"></div>
   <div class="list" id="results"></div>
+  <div id="mapArea" style="display:none"></div>
 
   <div class="foot">
     <span>Live data from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> · no data is invented — open any record to verify.</span>
@@ -217,6 +237,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   </div>
 </main>
 
+<div class="map-tip" id="mapTip"></div>
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
 
 <script>
@@ -248,13 +269,22 @@ applyTheme((()=>{ try{return localStorage.getItem('syed-theme')||'light';}catch(
 themeBtn.onclick = ()=> applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
 
 /* ── Segmented controls ── */
+// Re-run whichever field-driven view is active (Leaders or Map).
+function refreshField(){ if(state.mode==='map') runMap(); else if(state.mode==='leaders') runLeaders(); }
+
 $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   state.mode=b.dataset.mode;
   $('#modeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  $('#leadersControls').style.display = state.mode==='leaders'?'':'none';
-  $('#searchControls').style.display = state.mode==='search'?'':'none';
-  $('#results').innerHTML=''; $('#leadHead').innerHTML=''; $('#status').innerHTML='';
-  if(state.mode==='leaders') runLeaders();
+  const isMap=state.mode==='map', isSearch=state.mode==='search';
+  $('#leadersControls').style.display = (state.mode==='leaders'||isMap)?'':'none'; // field picker drives both
+  $('#searchControls').style.display = isSearch?'':'none';
+  $('#kindSeg').style.display = isMap?'none':''; // Map is institutions-only
+  $('#mapArea').style.display = isMap?'':'none';
+  $('#results').style.display = isMap?'none':'';
+  $('#leadHead').innerHTML=''; $('#status').innerHTML='';
+  if(state.mode==='leaders'){ $('#results').innerHTML=''; runLeaders(); }
+  else if(isMap){ runMap(); }
+  else { $('#results').innerHTML=''; }
 });
 $('#kindSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   state.kind=b.dataset.kind;
@@ -269,7 +299,7 @@ function renderChips(){
 }
 renderChips();
 chipsEl.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
-  const c = LENS.find(x=>x.id===b.dataset.field); if(c){ state.field=c; renderChips(); runLeaders(); }
+  const c = LENS.find(x=>x.id===b.dataset.field); if(c){ state.field=c; renderChips(); refreshField(); }
 });
 
 /* ── Field autocomplete (any OpenAlex concept) ── */
@@ -287,7 +317,7 @@ $('#fieldSearch').addEventListener('input', debounce(async e=>{
 fieldMenu.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   state.field={ id:b.dataset.id, name:b.dataset.name };
   renderChips(); fieldMenu.style.display='none'; $('#fieldSearch').value='';
-  runLeaders();
+  refreshField();
 });
 
 /* ── Entity search autocomplete ── */
@@ -442,6 +472,82 @@ async function journalProfile(id){
       ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
     </div>`;
 }
+
+/* ── World map ─────────────────────────────────────────────── */
+// D3 + topojson + the world outline are heavy, so load them once, lazily, only
+// when the Map tab is opened. All from CDN (UMD globals), like wordmap.
+let _mapLibs = null;
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('could not load '+src)); document.head.appendChild(s); }); }
+async function mapLibs(){
+  if(_mapLibs) return _mapLibs;
+  if(!window.d3) await loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js');
+  if(!window.topojson) await loadScript('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js');
+  const world = await getJSON('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+  _mapLibs = { d3:window.d3, topojson:window.topojson, world };
+  return _mapLibs;
+}
+
+const mapTip = $('#mapTip');
+function showTip(e,html){ mapTip.innerHTML=html; mapTip.style.display='block'; mapTip.style.left=(e.clientX+14)+'px'; mapTip.style.top=(e.clientY+14)+'px'; }
+function hideTip(){ mapTip.style.display='none'; }
+
+async function runMap(){
+  const f = state.field;
+  $('#leadHead').innerHTML = `<div class="lead-head">Where ${esc(f.name)} research happens</div><div class="lead-sub">Top institutions by output in the field, placed on the map — bubble size = works in the field. Click a bubble for its profile.</div>`;
+  $('#status').innerHTML=''; $('#mapArea').innerHTML = `<div class="map-loading"><span class="spin"></span> Loading map…</div>`;
+  try{
+    const libs = await mapLibs();
+    // top institutions in the field (ids + counts), then batch-fetch their geo.
+    const gb = await getJSON(`${OA}/works?filter=concepts.id:${f.id}&group_by=institutions.id`);
+    const top = (gb.group_by||[])
+      .filter(g=>g.key && /[A-Z]\d+$/.test(shortId(g.key)) && g.key_display_name && g.key_display_name.toLowerCase()!=='unknown')
+      .slice(0,50);
+    if(!top.length){ $('#mapArea').innerHTML = '<div class="note">No institutions to map for this field yet.</div>'; return; }
+    const countById = new Map(top.map(g=>[shortId(g.key), g.count]));
+    const ids = top.map(g=>shortId(g.key)).join('|');
+    const det = await getJSON(`${OA}/institutions?filter=ids.openalex:${ids}&per_page=50&select=id,display_name,geo,country_code,works_count,cited_by_count`);
+    const insts = (det.results||[])
+      .map(o=>({ id:shortId(o.id), name:o.display_name, geo:o.geo, country:o.geo&&o.geo.country, count:countById.get(shortId(o.id))||0 }))
+      .filter(o=>o.geo && o.geo.latitude!=null && o.geo.longitude!=null && o.count>0);
+    // country rollup (robust by name) for the strip under the map
+    let countries=[];
+    try{ const cr = await getJSON(`${OA}/works?filter=concepts.id:${f.id}&group_by=institutions.country_code`);
+      countries = (cr.group_by||[]).filter(x=>x.key_display_name && x.key_display_name.toLowerCase()!=='unknown').slice(0,8).map(x=>({name:x.key_display_name, count:x.count})); }catch(e){}
+    renderMap(libs, insts, countries);
+  }catch(err){
+    $('#mapArea').innerHTML = `<div class="note err">Couldn’t load the map: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderMap(libs, insts, countries){
+  const { d3, topojson, world } = libs;
+  const W=980, H=500;
+  const land = topojson.feature(world, world.objects.countries);
+  const proj = d3.geoNaturalEarth1().fitSize([W,H], {type:'Sphere'});
+  const path = d3.geoPath(proj);
+  const maxC = d3.max(insts, d=>d.count) || 1;
+  const r = d3.scaleSqrt().domain([0,maxC]).range([2.5,24]);
+  const color = d3.scaleSequential(d3.interpolateRgbBasis(['#FF9656','#F14575','#9270F4'])).domain([0,maxC]);
+
+  $('#mapArea').innerHTML = `<svg class="map-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="World map of top institutions"></svg>`
+    + (countries.length ? `<div class="map-countries"><span class="mc-label">Most active countries</span>${countries.map(c=>`<span class="mc-chip">${esc(c.name)} <b>${num(c.count)}</b></span>`).join('')}</div>` : '');
+  const svg = d3.select('#mapArea .map-svg');
+  svg.append('path').attr('class','geo-sphere').attr('d', path({type:'Sphere'}));
+  svg.append('path').attr('class','geo-graticule').attr('d', path(d3.geoGraticule10()));
+  svg.append('g').selectAll('path.geo-country').data(land.features).join('path').attr('class','geo-country').attr('d', path);
+  // bubbles — biggest first so the small ones stay clickable on top
+  const dots = insts.slice().sort((a,b)=>b.count-a.count);
+  svg.append('g').selectAll('circle').data(dots).join('circle')
+    .attr('class','map-dot')
+    .attr('cx', d=>proj([d.geo.longitude,d.geo.latitude])[0])
+    .attr('cy', d=>proj([d.geo.longitude,d.geo.latitude])[1])
+    .attr('r', d=>r(d.count))
+    .attr('fill', d=>color(d.count))
+    .on('mousemove', (e,d)=>showTip(e, `<b>${esc(d.name)}</b><br>${num(d.count)} works in field${d.country?` · ${esc(d.country)}`:''}`))
+    .on('mouseleave', hideTip)
+    .on('click', (e,d)=>{ hideTip(); openProfile('institutions', d.id); });
+}
+window.addEventListener('scroll', hideTip, { passive:true });
 
 /* ── Boot ── */
 runLeaders();
