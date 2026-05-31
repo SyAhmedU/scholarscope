@@ -105,6 +105,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .note.err{color:var(--magenta);}
 .lead-head{font-family:'Fraunces',serif;font-weight:600;font-size:1.4rem;letter-spacing:-.02em;margin:22px 0 4px;}
 .lead-sub{font-size:.82rem;color:var(--ink-faint);margin-bottom:14px;}
+.lead-count{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.06em;color:var(--ink-faint);text-align:center;margin:14px 0 2px;}
+.more-btn{display:block;margin:8px auto 4px;font-family:inherit;font-weight:700;font-size:.82rem;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:9px 22px;cursor:pointer;transition:.15s;}
+.more-btn:hover{border-color:transparent;background:var(--grad);color:#fff;}
 .list{display:flex;flex-direction:column;gap:9px;}
 .item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:13px 16px;cursor:pointer;transition:.15s;font-family:inherit;color:var(--ink);}
 .item:hover{border-color:var(--violet);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
@@ -246,6 +249,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   <div id="status"></div>
   <div id="leadHead"></div>
   <div class="list" id="results"></div>
+  <div id="leadMore"></div>
   <div id="mapArea" style="display:none"></div>
 
   <div class="foot">
@@ -272,6 +276,25 @@ const LENS = [
 ];
 const LENS_OR = LENS.map(c=>c.id).join('|');
 const HI_CITE = 200; // quality gate: only works cited this many times feed author/journal leaderboards
+
+// Management & business subfields — verified OpenAlex concept ids. A single
+// group_by caps at 200 authors, but the union of high-impact authors across
+// these subfields clears 1,000+ — every one a real OpenAlex author record.
+const BUSINESS_ID = 'C144133560';
+const MGMT_SUBFIELDS = [
+  { id:'C144133560', name:'Business' },
+  { id:'C187736073', name:'Management' },
+  { id:'C162853370', name:'Marketing' },
+  { id:'C10138342',  name:'Finance' },
+  { id:'C121955636', name:'Accounting' },
+  { id:'C84309077',  name:'Entrepreneurship' },
+  { id:'C21547014',  name:'Operations management' },
+  { id:'C202372285', name:'Human resource management' },
+  { id:'C56739046',  name:'Knowledge management' },
+  { id:'C39214371',  name:'Organizational behavior' },
+  { id:'C86275758',  name:'Strategic management' },
+];
+const LEAD_PAGE = 50; // leaderboard rows revealed per "Load more"
 
 // ISO 3166-1 numeric → alpha-2 (verified from restcountries) — joins OpenAlex's
 // alpha-2 country counts to world-atlas's numeric feature ids for the choropleth.
@@ -307,7 +330,7 @@ $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button');
   $('#mapViewRow').style.display = isMap?'':'none';
   $('#mapArea').style.display = isMap?'':'none';
   $('#results').style.display = isMap?'none':'';
-  $('#leadHead').innerHTML=''; $('#status').innerHTML='';
+  $('#leadHead').innerHTML=''; $('#status').innerHTML=''; $('#leadMore').innerHTML='';
   if(state.mode==='leaders'){ $('#results').innerHTML=''; runLeaders(); }
   else if(isMap){ runMap(); }
   else { $('#results').innerHTML=''; }
@@ -378,30 +401,80 @@ const LEAD_COPY = {
 };
 function skeletons(n){ return Array.from({length:n}).map(()=>'<div class="skeleton"></div>').join(''); }
 
+// Holds the full ranked leaderboard so "Load more" can reveal it client-side
+// without re-fetching (group_by has no cursor, so we fetch once and page in JS).
+const leadState = { rows: [], shown: 0, kind: null, statLabel: '' };
+
+const validId = u => /^[A-Z]\d+$/.test(shortId(u));
+function groupRows(groups){
+  return (groups||[])
+    .filter(g => validId(g.key) && g.key_display_name && g.key_display_name.toLowerCase()!=='unknown')
+    .map(g => ({ id: shortId(g.key), name: g.key_display_name, count: g.count }));
+}
+
+// Top high-impact authors across all management/business subfields. Each
+// subfield group_by returns up to 200; union by author id, summing their
+// highly-cited-work counts. Subfields that error out are simply skipped.
+async function fetchMgmtAuthors(){
+  const lists = await Promise.all(MGMT_SUBFIELDS.map(c =>
+    getJSON(`${OA}/works?filter=concepts.id:${c.id},cited_by_count:>${HI_CITE}&group_by=authorships.author.id`)
+      .then(d => d.group_by || []).catch(() => [])
+  ));
+  const map = new Map();
+  for(const groups of lists){
+    for(const r of groupRows(groups)){
+      const cur = map.get(r.id);
+      if(cur) cur.count += r.count; else map.set(r.id, { ...r });
+    }
+  }
+  return [...map.values()].sort((a,b) => b.count - a.count);
+}
+
+function renderLeaderRows(){
+  const { rows, shown, statLabel, kind } = leadState;
+  const view = rows.slice(0, shown);
+  $('#results').innerHTML = view.map((g,i) => `
+    <button class="item" data-id="${esc(g.id)}">
+      <span class="rank">${i+1}</span>
+      <span class="item-main"><span class="item-title">${esc(g.name)}</span></span>
+      <span class="item-stat">${num(g.count)} ${statLabel}</span>
+    </button>`).join('');
+  $('#results').querySelectorAll('.item').forEach(el => el.onclick = () => openProfile(kind, el.dataset.id));
+  const remaining = rows.length - shown;
+  $('#leadMore').innerHTML =
+    `<div class="lead-count">Showing ${num(view.length)} of ${num(rows.length)}</div>` +
+    (remaining > 0 ? `<button class="more-btn" id="moreBtn">Load ${num(Math.min(LEAD_PAGE, remaining))} more ↓</button>` : '');
+  const mb = $('#moreBtn');
+  if(mb) mb.onclick = () => { leadState.shown = Math.min(rows.length, shown + LEAD_PAGE); renderLeaderRows(); };
+}
+
 async function runLeaders(){
   const f = state.field, kind = state.kind;
-  $('#leadHead').innerHTML = `<div class="lead-head">${esc(LEAD_COPY[kind].head(f.name))}</div><div class="lead-sub">${esc(LEAD_COPY[kind].sub)}</div>`;
-  $('#status').innerHTML=''; $('#results').innerHTML = skeletons(8);
+  const mgmt = kind==='authors' && f.id===BUSINESS_ID;
+  const sub = kind!=='authors' ? LEAD_COPY[kind].sub
+    : mgmt ? `Top management & business authors across ${MGMT_SUBFIELDS.length} subfields, ranked by highly-cited works (cited ${HI_CITE}+). Every record is a real OpenAlex author.`
+           : LEAD_COPY.authors.sub;
+  $('#leadHead').innerHTML = `<div class="lead-head">${esc(LEAD_COPY[kind].head(f.name))}</div><div class="lead-sub">${esc(sub)}</div>`;
+  $('#status').innerHTML=''; $('#leadMore').innerHTML=''; $('#results').innerHTML = skeletons(8);
   try{
-    let url;
-    if(kind==='institutions') url = `${OA}/works?filter=concepts.id:${f.id}&group_by=institutions.id`;
-    else if(kind==='authors') url = `${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE}&group_by=authorships.author.id`;
-    else url = `${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE},primary_location.source.type:journal&group_by=primary_location.source.id`;
-    const d = await getJSON(url);
-    const rows = (d.group_by||[])
-      .filter(g => g.key && /[A-Z]\d+$/.test(shortId(g.key)) && g.key_display_name && g.key_display_name.toLowerCase()!=='unknown')
-      .slice(0,25);
-    if(!rows.length){ $('#results').innerHTML=''; $('#status').innerHTML='<div class="note">No ranked results for this field yet.</div>'; return; }
-    const statLabel = kind==='institutions'?'works':'hi-cited';
-    $('#results').innerHTML = rows.map((g,i)=>`
-      <button class="item" data-id="${shortId(g.key)}">
-        <span class="rank">${i+1}</span>
-        <span class="item-main"><span class="item-title">${esc(g.key_display_name)}</span></span>
-        <span class="item-stat">${num(g.count)} ${statLabel}</span>
-      </button>`).join('');
-    $('#results').querySelectorAll('.item').forEach(el=> el.onclick=()=>openProfile(kind, el.dataset.id));
+    let rows, statLabel;
+    if(kind==='authors'){
+      rows = mgmt ? await fetchMgmtAuthors()
+                  : groupRows((await getJSON(`${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE}&group_by=authorships.author.id`)).group_by);
+      statLabel = 'hi-cited';
+    } else {
+      const url = kind==='institutions'
+        ? `${OA}/works?filter=concepts.id:${f.id}&group_by=institutions.id`
+        : `${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE},primary_location.source.type:journal&group_by=primary_location.source.id`;
+      rows = groupRows((await getJSON(url)).group_by);
+      statLabel = kind==='institutions' ? 'works' : 'hi-cited';
+    }
+    if(!rows.length){ $('#results').innerHTML=''; $('#leadMore').innerHTML=''; $('#status').innerHTML='<div class="note">No ranked results for this field yet.</div>'; return; }
+    leadState.rows = rows; leadState.kind = kind; leadState.statLabel = statLabel;
+    leadState.shown = Math.min(rows.length, kind==='authors' ? LEAD_PAGE : 25);
+    renderLeaderRows();
   }catch(err){
-    $('#results').innerHTML=''; $('#status').innerHTML = `<div class="note err">Couldn’t load leaders: ${esc(err.message)}</div>`;
+    $('#results').innerHTML=''; $('#leadMore').innerHTML=''; $('#status').innerHTML = `<div class="note err">Couldn’t load leaders: ${esc(err.message)}</div>`;
   }
 }
 
