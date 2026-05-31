@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>ScholarScope — Institutions & authors in social science & management</title>
+<meta name="description" content="A live directory of the institutions, schools, journals, and authors that lead social science & management research. Every record is a real OpenAlex entity — search anyone, or browse the leaders in a field." />
+<meta name="theme-color" content="#FBF7EF" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='url(%23g)'/><text x='50%25' y='57%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='900' font-size='16' fill='white'>S</text><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23FF9656'/><stop offset='52%25' stop-color='%23F14575'/><stop offset='100%25' stop-color='%239270F4'/></linearGradient></defs></svg>" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════
+   SCHOLARSCOPE — institutions · schools · journals · authors in
+   social science & management. Single file, no build. Live data:
+   OpenAlex (anonymous, CORS). Nothing is invented — every entity and
+   number is a real OpenAlex record, with links out to verify.
+   Shares the Research-Suite "Throughline" design tokens.
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --paper:#FBF7EF; --paper-2:#FFFFFF; --paper-3:#F3ECDF;
+  --ink:#211B2E; --ink-soft:#574E64; --ink-faint:#8C8498;
+  --line:rgba(33,27,46,.12); --line-soft:rgba(33,27,46,.07);
+  --coral:#FF9656; --magenta:#F14575; --violet:#9270F4;
+  --grad:linear-gradient(135deg,#FF9656 0%,#F14575 52%,#9270F4 100%);
+  --grad-soft:linear-gradient(135deg,rgba(255,150,86,.14),rgba(241,69,117,.12),rgba(146,112,244,.14));
+  --shadow:0 24px 60px -28px rgba(33,27,46,.35); --shadow-sm:0 8px 24px -14px rgba(33,27,46,.3);
+}
+html[data-theme="dark"]{
+  --paper:#14111C; --paper-2:#1C1827; --paper-3:#241F31;
+  --ink:#F4EFF8; --ink-soft:#B8AEC6; --ink-faint:#7C7389;
+  --line:rgba(255,255,255,.13); --line-soft:rgba(255,255,255,.07);
+  --grad-soft:linear-gradient(135deg,rgba(255,150,86,.16),rgba(241,69,117,.13),rgba(146,112,244,.18));
+  --shadow:0 24px 60px -24px rgba(0,0,0,.7); --shadow-sm:0 8px 24px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:var(--paper); color:var(--ink);
+  line-height:1.6; overflow-x:hidden; -webkit-font-smoothing:antialiased; min-height:100vh;
+  transition:background .4s ease,color .4s ease;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="dark"] body::before{mix-blend-mode:screen;opacity:.05;}
+a{color:inherit;text-decoration:none;}
+::selection{background:var(--magenta);color:#fff;}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--violet);outline-offset:2px;border-radius:6px;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px;position:relative;z-index:2;}
+
+/* ── Brand bar ─────────────────────────────────────────────── */
+.bar{
+  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;
+  padding:9px 22px;background:color-mix(in srgb,var(--paper) 82%,transparent);
+  backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--line);
+}
+.s-mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;
+  color:#fff;font-weight:900;font-size:15px;box-shadow:0 4px 14px -4px rgba(241,69,117,.6);animation:glow 4s ease-in-out infinite;}
+@keyframes glow{0%,100%{box-shadow:0 4px 14px -4px rgba(241,69,117,.5);}50%{box-shadow:0 4px 22px -2px rgba(146,112,244,.7);}}
+.bar-name{font-weight:800;letter-spacing:-.01em;font-size:15px;}
+.bar-name b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.bar-tag{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+.bar-sp{flex:1;}
+.bar-link{font-size:.78rem;font-weight:600;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line);transition:.15s;}
+.bar-link:hover{color:var(--ink);border-color:var(--violet);}
+.theme-btn{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);cursor:pointer;font-size:15px;color:var(--ink);transition:.15s;}
+.theme-btn:hover{border-color:var(--magenta);}
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero{padding:46px 0 22px;}
+.hero h1{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-.025em;font-size:clamp(2rem,5vw,3.1rem);line-height:1.04;max-width:16ch;}
+.hero h1 .hl{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{margin-top:14px;color:var(--ink-soft);font-size:1.05rem;max-width:60ch;}
+.hero .kicker{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--magenta);margin-bottom:12px;}
+
+/* ── Controls ──────────────────────────────────────────────── */
+.controls{margin:18px 0 8px;display:flex;flex-direction:column;gap:14px;}
+.seg{display:inline-flex;background:var(--paper-3);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap;}
+.seg button{border:0;background:transparent;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;color:var(--ink-soft);padding:7px 16px;border-radius:999px;transition:.15s;}
+.seg button.on{background:var(--paper-2);color:var(--ink);box-shadow:var(--shadow-sm);}
+.seg button:hover:not(.on){color:var(--ink);}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+.chips{display:flex;gap:7px;flex-wrap:wrap;}
+.chip{border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);cursor:pointer;font-family:inherit;font-weight:600;font-size:.8rem;padding:6px 13px;border-radius:999px;transition:.15s;}
+.chip:hover{border-color:var(--violet);color:var(--ink);}
+.chip.on{background:var(--grad);color:#fff;border-color:transparent;}
+
+/* search + autocomplete */
+.ac{position:relative;flex:1 1 320px;max-width:520px;}
+.input{width:100%;font-family:inherit;font-size:.95rem;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;transition:.15s;}
+.input:focus{border-color:var(--magenta);box-shadow:0 0 0 3px rgba(241,69,117,.12);}
+.menu{position:absolute;z-index:30;top:calc(100% + 6px);left:0;right:0;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;max-height:340px;overflow-y:auto;}
+.opt{display:flex;justify-content:space-between;gap:12px;align-items:baseline;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line-soft);padding:10px 13px;cursor:pointer;font-family:inherit;font-size:.9rem;color:var(--ink);}
+.opt:last-child{border-bottom:0;}
+.opt:hover{background:var(--paper-3);}
+.opt .meta{font-size:.72rem;color:var(--ink-faint);white-space:nowrap;}
+
+/* ── Results / leaderboard ─────────────────────────────────── */
+.note{font-size:.85rem;color:var(--ink-soft);margin:6px 0;}
+.note.err{color:var(--magenta);}
+.lead-head{font-family:'Fraunces',serif;font-weight:600;font-size:1.4rem;letter-spacing:-.02em;margin:22px 0 4px;}
+.lead-sub{font-size:.82rem;color:var(--ink-faint);margin-bottom:14px;}
+.list{display:flex;flex-direction:column;gap:9px;}
+.item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:13px 16px;cursor:pointer;transition:.15s;font-family:inherit;color:var(--ink);}
+.item:hover{border-color:var(--violet);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.rank{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.9rem;color:var(--ink-faint);min-width:26px;}
+.item-main{flex:1;min-width:0;}
+.item-title{font-weight:700;font-size:.98rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:.78rem;color:var(--ink-soft);}
+.item-stat{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--magenta);font-weight:600;white-space:nowrap;}
+.skeleton{height:62px;border-radius:14px;background:linear-gradient(90deg,var(--paper-3),var(--paper-2),var(--paper-3));background-size:200% 100%;animation:sh 1.3s linear infinite;}
+@keyframes sh{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── Profile modal ─────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;z-index:100;background:rgba(20,14,30,.5);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
+.scrim.show{display:flex;}
+.modal{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);max-width:680px;width:100%;padding:26px 26px 30px;position:relative;animation:rise .25s ease;}
+@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.modal-x{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);cursor:pointer;font-size:17px;line-height:1;}
+.modal-x:hover{border-color:var(--magenta);color:var(--magenta);}
+.m-kind{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--violet);font-weight:600;}
+.m-title{font-family:'Fraunces',serif;font-weight:600;font-size:1.55rem;letter-spacing:-.02em;line-height:1.12;margin:4px 0 2px;padding-right:30px;}
+.m-meta{font-size:.85rem;color:var(--ink-soft);margin-bottom:14px;}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 16px;}
+.stat{flex:1 1 120px;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;}
+.stat .n{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:1.2rem;color:var(--ink);}
+.stat .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);}
+.m-sec{margin-top:14px;}
+.m-sec h4{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{font-size:.76rem;padding:4px 10px;border-radius:999px;background:var(--paper-3);border:1px solid var(--line);color:var(--ink-soft);}
+.work{display:block;padding:9px 0;border-top:1px solid var(--line-soft);}
+.work:first-child{border-top:0;}
+.work-t{font-size:.9rem;font-weight:600;color:var(--ink);line-height:1.35;}
+.work-m{font-size:.76rem;color:var(--ink-faint);}
+.m-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.m-link{font-size:.8rem;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);transition:.15s;}
+.m-link:hover{border-color:var(--violet);color:var(--ink);}
+.m-link.grad{background:var(--grad);color:#fff;border-color:transparent;}
+
+/* ── Footer ────────────────────────────────────────────────── */
+.foot{margin:48px 0 30px;padding-top:18px;border-top:1px solid var(--line);font-size:.78rem;color:var(--ink-faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.foot a{color:var(--ink-soft);font-weight:600;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--magenta);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(max-width:560px){.hero{padding:30px 0 16px;}.bar-tag{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="s-mark">S</div>
+  <div>
+    <div class="bar-name">Scholar<b>Scope</b></div>
+    <div class="bar-tag">Research Suite · reference</div>
+  </div>
+  <div class="bar-sp"></div>
+  <a class="bar-link" href="https://syahmedu.github.io/research-suite/" target="_blank" rel="noopener">← Research Suite</a>
+  <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+</div>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">Institutions · Schools · Journals · Authors</div>
+    <h1>Who leads <span class="hl">social science &amp; management</span> research?</h1>
+    <p>A live directory of the institutions, schools, journals, and scholars shaping the field. Every record is a real <strong>OpenAlex</strong> entity — browse the leaders in a discipline, or search anyone by name.</p>
+  </section>
+
+  <section class="controls">
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" id="modeSeg">
+        <button data-mode="leaders" class="on">🏆 Leaders</button>
+        <button data-mode="search">🔎 Search</button>
+      </div>
+      <div class="seg" id="kindSeg">
+        <button data-kind="institutions" class="on">Institutions</button>
+        <button data-kind="authors">Authors</button>
+        <button data-kind="journals">Journals</button>
+      </div>
+    </div>
+
+    <!-- Leaders: field picker -->
+    <div id="leadersControls">
+      <div class="row">
+        <span class="lbl">Field</span>
+        <div class="chips" id="fieldChips"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="ac">
+          <input class="input" id="fieldSearch" placeholder="…or search any field (e.g. Leadership, Marketing)" autocomplete="off">
+          <div class="menu" id="fieldMenu" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search: entity typeahead -->
+    <div id="searchControls" style="display:none">
+      <div class="ac">
+        <input class="input" id="entitySearch" placeholder="Search an institution, author, or journal…" autocomplete="off">
+        <div class="menu" id="entityMenu" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="status"></div>
+  <div id="leadHead"></div>
+  <div class="list" id="results"></div>
+
+  <div class="foot">
+    <span>Live data from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> · no data is invented — open any record to verify.</span>
+    <span class="mono">ScholarScope</span>
+  </div>
+</main>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+
+<script>
+const OA = 'https://api.openalex.org';
+// The social-science & management lens — OpenAlex level-0 concepts (verified ids).
+const LENS = [
+  { id:'C15744967', name:'Psychology' },
+  { id:'C144024400', name:'Sociology' },
+  { id:'C162324750', name:'Economics' },
+  { id:'C17744445', name:'Political science' },
+  { id:'C144133560', name:'Business' },
+];
+const LENS_OR = LENS.map(c=>c.id).join('|');
+const HI_CITE = 200; // quality gate: only works cited this many times feed author/journal leaderboards
+
+const state = { mode:'leaders', kind:'institutions', field:LENS[0] };
+
+const $ = s => document.querySelector(s);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num = n => (typeof n==='number'?n.toLocaleString():'—');
+const shortId = u => { const m=String(u||'').match(/[A-Z]\d+$/); return m?m[0]:u; };
+async function getJSON(url){ const r = await fetch(url,{headers:{Accept:'application/json'}}); if(!r.ok) throw new Error('OpenAlex '+r.status); return r.json(); }
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+/* ── Theme (shared with the suite via localStorage 'syed-theme') ── */
+const themeBtn = $('#themeBtn');
+function applyTheme(t){ document.documentElement.setAttribute('data-theme',t); try{localStorage.setItem('syed-theme',t);}catch(e){} }
+applyTheme((()=>{ try{return localStorage.getItem('syed-theme')||'light';}catch(e){return 'light';} })());
+themeBtn.onclick = ()=> applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+
+/* ── Segmented controls ── */
+$('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+  state.mode=b.dataset.mode;
+  $('#modeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#leadersControls').style.display = state.mode==='leaders'?'':'none';
+  $('#searchControls').style.display = state.mode==='search'?'':'none';
+  $('#results').innerHTML=''; $('#leadHead').innerHTML=''; $('#status').innerHTML='';
+  if(state.mode==='leaders') runLeaders();
+});
+$('#kindSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+  state.kind=b.dataset.kind;
+  $('#kindSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  if(state.mode==='leaders') runLeaders(); else { $('#entitySearch').value=''; $('#entityMenu').style.display='none'; $('#results').innerHTML=''; }
+});
+
+/* ── Field chips ── */
+const chipsEl = $('#fieldChips');
+function renderChips(){
+  chipsEl.innerHTML = LENS.map(c=>`<button class="chip${c.id===state.field.id?' on':''}" data-field="${c.id}">${esc(c.name)}</button>`).join('');
+}
+renderChips();
+chipsEl.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+  const c = LENS.find(x=>x.id===b.dataset.field); if(c){ state.field=c; renderChips(); runLeaders(); }
+});
+
+/* ── Field autocomplete (any OpenAlex concept) ── */
+const fieldMenu = $('#fieldMenu');
+$('#fieldSearch').addEventListener('input', debounce(async e=>{
+  const q=e.target.value.trim(); if(q.length<2){ fieldMenu.style.display='none'; return; }
+  try{
+    const d = await getJSON(`${OA}/autocomplete/concepts?q=${encodeURIComponent(q)}`);
+    const rows=(d.results||[]).filter(r=>r.id&&r.display_name).slice(0,8);
+    if(!rows.length){ fieldMenu.style.display='none'; return; }
+    fieldMenu.innerHTML = rows.map(r=>`<button class="opt" data-id="${shortId(r.id)}" data-name="${esc(r.display_name)}"><span>${esc(r.display_name)}</span>${r.works_count!=null?`<span class="meta">${num(r.works_count)} works</span>`:''}</button>`).join('');
+    fieldMenu.style.display='';
+  }catch(err){ fieldMenu.style.display='none'; }
+},250));
+fieldMenu.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+  state.field={ id:b.dataset.id, name:b.dataset.name };
+  renderChips(); fieldMenu.style.display='none'; $('#fieldSearch').value='';
+  runLeaders();
+});
+
+/* ── Entity search autocomplete ── */
+const entityMenu = $('#entityMenu');
+$('#entitySearch').addEventListener('input', debounce(async e=>{
+  const q=e.target.value.trim(); if(q.length<2){ entityMenu.style.display='none'; return; }
+  const ep = state.kind==='authors'?'authors':state.kind==='journals'?'sources':'institutions';
+  try{
+    const d = await getJSON(`${OA}/autocomplete/${ep}?q=${encodeURIComponent(q)}`);
+    const rows=(d.results||[]).filter(r=>r.id&&r.display_name).slice(0,8);
+    if(!rows.length){ entityMenu.style.display='none'; return; }
+    entityMenu.innerHTML = rows.map(r=>`<button class="opt" data-id="${shortId(r.id)}"><span>${esc(r.display_name)}</span><span class="meta">${esc(r.hint||'')}</span></button>`).join('');
+    entityMenu.style.display='';
+  }catch(err){ entityMenu.style.display='none'; }
+},250));
+entityMenu.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+  entityMenu.style.display='none';
+  openProfile(state.kind, b.dataset.id);
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('.ac')){ fieldMenu.style.display='none'; entityMenu.style.display='none'; } });
+
+/* ── Leaderboards ──────────────────────────────────────────── */
+const LEAD_COPY = {
+  institutions:{ head:f=>`Most prolific institutions in ${f}`, sub:'Ranked by number of works in the field (OpenAlex).' },
+  authors:{ head:f=>`Highest-impact authors in ${f}`, sub:`Ranked by count of highly-cited works (cited ${HI_CITE}+ times).` },
+  journals:{ head:f=>`Leading journals in ${f}`, sub:`Ranked by count of highly-cited articles (cited ${HI_CITE}+ times).` },
+};
+function skeletons(n){ return Array.from({length:n}).map(()=>'<div class="skeleton"></div>').join(''); }
+
+async function runLeaders(){
+  const f = state.field, kind = state.kind;
+  $('#leadHead').innerHTML = `<div class="lead-head">${esc(LEAD_COPY[kind].head(f.name))}</div><div class="lead-sub">${esc(LEAD_COPY[kind].sub)}</div>`;
+  $('#status').innerHTML=''; $('#results').innerHTML = skeletons(8);
+  try{
+    let url;
+    if(kind==='institutions') url = `${OA}/works?filter=concepts.id:${f.id}&group_by=institutions.id`;
+    else if(kind==='authors') url = `${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE}&group_by=authorships.author.id`;
+    else url = `${OA}/works?filter=concepts.id:${f.id},cited_by_count:>${HI_CITE},primary_location.source.type:journal&group_by=primary_location.source.id`;
+    const d = await getJSON(url);
+    const rows = (d.group_by||[])
+      .filter(g => g.key && /[A-Z]\d+$/.test(shortId(g.key)) && g.key_display_name && g.key_display_name.toLowerCase()!=='unknown')
+      .slice(0,25);
+    if(!rows.length){ $('#results').innerHTML=''; $('#status').innerHTML='<div class="note">No ranked results for this field yet.</div>'; return; }
+    const statLabel = kind==='institutions'?'works':'hi-cited';
+    $('#results').innerHTML = rows.map((g,i)=>`
+      <button class="item" data-id="${shortId(g.key)}">
+        <span class="rank">${i+1}</span>
+        <span class="item-main"><span class="item-title">${esc(g.key_display_name)}</span></span>
+        <span class="item-stat">${num(g.count)} ${statLabel}</span>
+      </button>`).join('');
+    $('#results').querySelectorAll('.item').forEach(el=> el.onclick=()=>openProfile(kind, el.dataset.id));
+  }catch(err){
+    $('#results').innerHTML=''; $('#status').innerHTML = `<div class="note err">Couldn’t load leaders: ${esc(err.message)}</div>`;
+  }
+}
+
+/* ── Profiles ──────────────────────────────────────────────── */
+const scrim = $('#scrim'), modal = $('#modal');
+function closeModal(){ scrim.classList.remove('show'); }
+scrim.addEventListener('click', e=>{ if(e.target===scrim) closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+function workRow(w){
+  const doi = w.doi ? w.doi.replace(/^https?:\/\/(dx\.)?doi\.org\//,'') : null;
+  const inner = `<div class="work-t">${esc(w.title||w.display_name||'Untitled')}</div><div class="work-m">${w.publication_year||'—'} · ${num(w.cited_by_count)} citations</div>`;
+  return doi ? `<a class="work" href="https://doi.org/${esc(doi)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="work">${inner}</div>`;
+}
+function statBox(n,k){ return `<div class="stat"><div class="n">${n}</div><div class="k">${k}</div></div>`; }
+
+async function openProfile(kind, id){
+  scrim.classList.add('show');
+  modal.innerHTML = `<button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button><div style="padding:30px 0;text-align:center;color:var(--ink-faint)"><span class="spin"></span> Loading profile…</div>`;
+  try{
+    if(kind==='institutions') await institutionProfile(id);
+    else if(kind==='authors') await authorProfile(id);
+    else await journalProfile(id);
+  }catch(err){
+    modal.innerHTML = `<button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button><div class="note err" style="padding:14px 0">Couldn’t load that profile: ${esc(err.message)}</div>`;
+  }
+}
+
+async function institutionProfile(id){
+  const o = await getJSON(`${OA}/institutions/${id}?select=display_name,country_code,geo,type,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  const [dom, top] = await Promise.all([
+    getJSON(`${OA}/works?filter=institutions.id:${id},concepts.id:${LENS_OR}&per_page=1`).then(r=>r.meta&&r.meta.count).catch(()=>null),
+    getJSON(`${OA}/works?filter=institutions.id:${id},concepts.id:${LENS_OR}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]),
+  ]);
+  const loc = [o.geo&&o.geo.city, o.country_code].filter(Boolean).join(', ');
+  const ror = o.ids&&o.ids.ror;
+  modal.innerHTML = `
+    <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+    <div class="m-kind">Institution</div>
+    <div class="m-title">${esc(o.display_name)}</div>
+    <div class="m-meta">${esc([o.type&&o.type[0].toUpperCase()+o.type.slice(1), loc].filter(Boolean).join(' · '))||'&nbsp;'}</div>
+    <div class="stats">
+      ${statBox(num(o.works_count),'Works')}
+      ${statBox(num(o.cited_by_count),'Citations')}
+      ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
+      ${statBox(dom!=null?num(dom):'—','Soc-sci works')}
+    </div>
+    ${top.length?`<div class="m-sec"><h4>Top works in social science &amp; management</h4>${top.map(workRow).join('')}</div>`:''}
+    <div class="m-links">
+      <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
+      ${ror?`<a class="m-link" href="${esc(ror)}" target="_blank" rel="noopener">ROR ↗</a>`:''}
+      ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
+    </div>`;
+}
+
+async function authorProfile(id){
+  const o = await getJSON(`${OA}/authors/${id}?select=display_name,last_known_institutions,affiliations,x_concepts,summary_stats,works_count,cited_by_count,ids`);
+  const top = await getJSON(`${OA}/works?filter=authorships.author.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
+  const aff = (o.last_known_institutions&&o.last_known_institutions.length?o.last_known_institutions:(o.affiliations||[]).map(a=>a.institution).filter(Boolean))
+    .map(x=>x.display_name+(x.country_code?` (${x.country_code})`:'')).slice(0,2).join(' · ');
+  const orcid = o.ids&&o.ids.orcid;
+  const concepts = (o.x_concepts||[]).filter(c=>c.score>0).slice(0,6).map(c=>c.display_name);
+  modal.innerHTML = `
+    <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+    <div class="m-kind">Author</div>
+    <div class="m-title">${esc(o.display_name)}</div>
+    <div class="m-meta">${esc(aff)||'Affiliation unavailable'}</div>
+    <div class="stats">
+      ${statBox(num(o.works_count),'Works')}
+      ${statBox(num(o.cited_by_count),'Citations')}
+      ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
+      ${statBox(o.summary_stats?num(o.summary_stats.i10_index):'—','i10-index')}
+    </div>
+    ${concepts.length?`<div class="m-sec"><h4>Research areas</h4><div class="tags">${concepts.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div></div>`:''}
+    ${top.length?`<div class="m-sec"><h4>Most-cited works</h4>${top.map(workRow).join('')}</div>`:''}
+    <div class="m-links">
+      <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
+      ${orcid?`<a class="m-link" href="${esc(orcid)}" target="_blank" rel="noopener">ORCID ↗</a>`:''}
+    </div>`;
+}
+
+async function journalProfile(id){
+  const o = await getJSON(`${OA}/sources/${id}?select=display_name,host_organization_name,issn_l,is_oa,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  const top = await getJSON(`${OA}/works?filter=primary_location.source.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
+  modal.innerHTML = `
+    <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+    <div class="m-kind">Journal · Source</div>
+    <div class="m-title">${esc(o.display_name)}</div>
+    <div class="m-meta">${esc([o.host_organization_name, o.issn_l&&('ISSN '+o.issn_l), o.is_oa?'Open access':null].filter(Boolean).join(' · '))||'&nbsp;'}</div>
+    <div class="stats">
+      ${statBox(num(o.works_count),'Works')}
+      ${statBox(num(o.cited_by_count),'Citations')}
+      ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
+      ${statBox(o.summary_stats&&o.summary_stats['2yr_mean_citedness']!=null?o.summary_stats['2yr_mean_citedness'].toFixed(1):'—','2yr impact')}
+    </div>
+    ${top.length?`<div class="m-sec"><h4>Most-cited articles</h4>${top.map(workRow).join('')}</div>`:''}
+    <div class="m-links">
+      <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
+      ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
+    </div>`;
+}
+
+/* ── Boot ── */
+runLeaders();
+</script>
+</body>
+</html>
