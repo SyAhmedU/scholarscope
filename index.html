@@ -146,6 +146,26 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .m-link:hover{border-color:var(--violet);color:var(--ink);}
 .m-link.grad{background:var(--grad);color:#fff;border-color:transparent;}
 
+/* ── Compare tray + table ──────────────────────────────────── */
+.cmp-tray{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:120;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:92vw;background:var(--paper-2);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:9px 12px;}
+.cmp-tray-label{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+.cmp-chip{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ink);background:var(--paper-3);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 11px;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cmp-chip button{background:none;border:0;color:var(--ink-faint);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;}
+.cmp-chip button:hover{color:var(--magenta);}
+.cmp-go{font-family:inherit;font-weight:700;font-size:.78rem;color:#fff;background:var(--grad);border:0;border-radius:999px;padding:7px 14px;cursor:pointer;}
+.cmp-go:disabled{opacity:.4;cursor:not-allowed;}
+.cmp-clear{font-family:inherit;font-size:.76rem;color:var(--ink-soft);background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;}
+.cmp-clear:hover{border-color:var(--magenta);color:var(--magenta);}
+.cmp-table-wrap{overflow-x:auto;margin-top:12px;}
+.cmp-table{border-collapse:collapse;width:100%;font-size:.86rem;}
+.cmp-table th,.cmp-table td{border-bottom:1px solid var(--line-soft);padding:9px 13px;text-align:right;white-space:nowrap;}
+.cmp-table thead th{color:var(--ink);font-weight:700;vertical-align:bottom;}
+.cmp-table thead th:first-child,.cmp-table tbody th{text-align:left;color:var(--ink-soft);font-weight:600;}
+.cmp-table thead a{color:var(--violet);text-decoration:none;}
+.cmp-table thead a:hover{text-decoration:underline;}
+.cmp-kind{font-family:'IBM Plex Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:400;}
+.cmp-table td.cmp-best{color:#1b8a5a;font-weight:700;background:color-mix(in srgb,#1b8a5a 9%,transparent);}
+
 /* ── World map ─────────────────────────────────────────────── */
 #mapArea{margin-top:18px;}
 .map-svg{display:block;width:100%;height:auto;max-width:980px;margin:0 auto;}
@@ -301,7 +321,7 @@ const LEAD_PAGE = 50; // leaderboard rows revealed per "Load more"
 const NUM2A2 = {"4":"AF","8":"AL","10":"AQ","12":"DZ","16":"AS","20":"AD","24":"AO","28":"AG","31":"AZ","32":"AR","36":"AU","40":"AT","44":"BS","48":"BH","50":"BD","51":"AM","52":"BB","56":"BE","60":"BM","64":"BT","68":"BO","70":"BA","72":"BW","74":"BV","76":"BR","84":"BZ","86":"IO","90":"SB","92":"VG","96":"BN","100":"BG","104":"MM","108":"BI","112":"BY","116":"KH","120":"CM","124":"CA","132":"CV","136":"KY","140":"CF","144":"LK","148":"TD","152":"CL","156":"CN","158":"TW","162":"CX","166":"CC","170":"CO","174":"KM","175":"YT","178":"CG","180":"CD","184":"CK","188":"CR","191":"HR","192":"CU","196":"CY","203":"CZ","204":"BJ","208":"DK","212":"DM","214":"DO","218":"EC","222":"SV","226":"GQ","231":"ET","232":"ER","233":"EE","234":"FO","238":"FK","239":"GS","242":"FJ","246":"FI","248":"AX","250":"FR","254":"GF","258":"PF","260":"TF","262":"DJ","266":"GA","268":"GE","270":"GM","275":"PS","276":"DE","288":"GH","292":"GI","296":"KI","300":"GR","304":"GL","308":"GD","312":"GP","316":"GU","320":"GT","324":"GN","328":"GY","332":"HT","334":"HM","336":"VA","340":"HN","344":"HK","348":"HU","352":"IS","356":"IN","360":"ID","364":"IR","368":"IQ","372":"IE","376":"IL","380":"IT","384":"CI","388":"JM","392":"JP","398":"KZ","400":"JO","404":"KE","408":"KP","410":"KR","414":"KW","417":"KG","418":"LA","422":"LB","426":"LS","428":"LV","430":"LR","434":"LY","438":"LI","440":"LT","442":"LU","446":"MO","450":"MG","454":"MW","458":"MY","462":"MV","466":"ML","470":"MT","474":"MQ","478":"MR","480":"MU","484":"MX","492":"MC","496":"MN","498":"MD","499":"ME","500":"MS","504":"MA","508":"MZ","512":"OM","516":"NA","520":"NR","524":"NP","528":"NL","531":"CW","533":"AW","534":"SX","535":"BQ","540":"NC","548":"VU","554":"NZ","558":"NI","562":"NE","566":"NG","570":"NU","574":"NF","578":"NO","580":"MP","581":"UM","583":"FM","584":"MH","585":"PW","586":"PK","591":"PA","598":"PG","600":"PY","604":"PE","608":"PH","612":"PN","616":"PL","620":"PT","624":"GW","626":"TL","630":"PR","634":"QA","638":"RE","642":"RO","643":"RU","646":"RW","652":"BL","654":"SH","659":"KN","660":"AI","662":"LC","663":"MF","666":"PM","670":"VC","674":"SM","678":"ST","682":"SA","686":"SN","688":"RS","690":"SC","694":"SL","702":"SG","703":"SK","704":"VN","705":"SI","706":"SO","710":"ZA","716":"ZW","724":"ES","728":"SS","729":"SD","732":"EH","740":"SR","744":"SJ","748":"SZ","752":"SE","756":"CH","760":"SY","762":"TJ","764":"TH","768":"TG","772":"TK","776":"TO","780":"TT","784":"AE","788":"TN","792":"TR","795":"TM","796":"TC","798":"TV","800":"UG","804":"UA","807":"MK","818":"EG","826":"GB","831":"GG","832":"JE","833":"IM","834":"TZ","840":"US","850":"VI","854":"BF","858":"UY","860":"UZ","862":"VE","876":"WF","882":"WS","887":"YE","894":"ZM"};
 function shortCountry(url){ const m = String(url||'').match(/\/countries\/([A-Za-z]{2})$/); return m ? m[1].toUpperCase() : null; }
 
-const state = { mode:'leaders', kind:'institutions', field:LENS[0], mapView:'institutions', drillA2:null, drillName:null };
+const state = { mode:'leaders', kind:'institutions', field:LENS[0], mapView:'institutions', drillA2:null, drillName:null, compare:[] };
 
 const $ = s => document.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -505,6 +525,7 @@ async function openProfile(kind, id){
 
 async function institutionProfile(id){
   const o = await getJSON(`${OA}/institutions/${id}?select=display_name,country_code,geo,type,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  cmpNames[id] = o.display_name;
   const [dom, top] = await Promise.all([
     getJSON(`${OA}/works?filter=institutions.id:${id},concepts.id:${LENS_OR}&per_page=1`).then(r=>r.meta&&r.meta.count).catch(()=>null),
     getJSON(`${OA}/works?filter=institutions.id:${id},concepts.id:${LENS_OR}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]),
@@ -527,11 +548,13 @@ async function institutionProfile(id){
       <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
       ${ror?`<a class="m-link" href="${esc(ror)}" target="_blank" rel="noopener">ROR ↗</a>`:''}
       ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
+      <button class="m-link" id="cmp-btn-${id}" onclick="compareToggle('institutions','${id}')">${inCompare(id)?'✓ In compare':'＋ Compare'}</button>
     </div>`;
 }
 
 async function authorProfile(id){
   const o = await getJSON(`${OA}/authors/${id}?select=display_name,last_known_institutions,affiliations,x_concepts,summary_stats,works_count,cited_by_count,ids`);
+  cmpNames[id] = o.display_name;
   const top = await getJSON(`${OA}/works?filter=authorships.author.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
   const aff = (o.last_known_institutions&&o.last_known_institutions.length?o.last_known_institutions:(o.affiliations||[]).map(a=>a.institution).filter(Boolean))
     .map(x=>x.display_name+(x.country_code?` (${x.country_code})`:'')).slice(0,2).join(' · ');
@@ -553,11 +576,13 @@ async function authorProfile(id){
     <div class="m-links">
       <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
       ${orcid?`<a class="m-link" href="${esc(orcid)}" target="_blank" rel="noopener">ORCID ↗</a>`:''}
+      <button class="m-link" id="cmp-btn-${id}" onclick="compareToggle('authors','${id}')">${inCompare(id)?'✓ In compare':'＋ Compare'}</button>
     </div>`;
 }
 
 async function journalProfile(id){
   const o = await getJSON(`${OA}/sources/${id}?select=display_name,host_organization_name,issn_l,is_oa,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  cmpNames[id] = o.display_name;
   const top = await getJSON(`${OA}/works?filter=primary_location.source.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
   modal.innerHTML = `
     <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
@@ -574,7 +599,66 @@ async function journalProfile(id){
     <div class="m-links">
       <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
       ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
+      <button class="m-link" id="cmp-btn-${id}" onclick="compareToggle('journals','${id}')">${inCompare(id)?'✓ In compare':'＋ Compare'}</button>
     </div>`;
+}
+
+/* ── Compare (side by side) ────────────────────────────────── */
+// Pick up to 4 entities from their profiles, then compare on shared metrics
+// pulled live from OpenAlex (works, citations, h/i10-index, 2-yr citedness).
+const cmpNames = {};
+const CMP_MAX = 4;
+function inCompare(id){ return state.compare.some(c=>c.id===id); }
+function compareToggle(kind,id){
+  const i = state.compare.findIndex(c=>c.id===id);
+  if(i>=0) state.compare.splice(i,1);
+  else { if(state.compare.length>=CMP_MAX) return; state.compare.push({kind,id,name:cmpNames[id]||id}); }
+  const b = document.getElementById('cmp-btn-'+id);
+  if(b) b.textContent = inCompare(id) ? '✓ In compare' : '＋ Compare';
+  renderCompareTray();
+}
+function clearCompare(){ state.compare=[]; renderCompareTray(); }
+function renderCompareTray(){
+  let tray = document.getElementById('cmp-tray');
+  if(!state.compare.length){ if(tray) tray.remove(); return; }
+  if(!tray){ tray=document.createElement('div'); tray.id='cmp-tray'; tray.className='cmp-tray'; document.body.appendChild(tray); }
+  tray.innerHTML = `<span class="cmp-tray-label">Compare</span>`
+    + state.compare.map(c=>`<span class="cmp-chip">${esc(c.name)}<button onclick="compareToggle('${c.kind}','${c.id}')" aria-label="remove">×</button></span>`).join('')
+    + `<button class="cmp-go" ${state.compare.length<2?'disabled':''} onclick="openCompare()">Compare ${state.compare.length} →</button>`
+    + `<button class="cmp-clear" onclick="clearCompare()">Clear</button>`;
+}
+async function compareFetch(kind,id){
+  const path = kind==='authors'?'authors':kind==='journals'?'sources':'institutions';
+  const o = await getJSON(`${OA}/${path}/${id}?select=display_name,works_count,cited_by_count,summary_stats`);
+  const s = o.summary_stats||{};
+  return { id, kind, name:o.display_name, works:o.works_count, cites:o.cited_by_count, h:s.h_index, i10:s.i10_index, twoyr:s['2yr_mean_citedness'] };
+}
+async function openCompare(){
+  if(state.compare.length<2) return;
+  scrim.classList.add('show');
+  modal.innerHTML = `<button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button><div style="padding:30px 0;text-align:center;color:var(--ink-faint)"><span class="spin"></span> Loading comparison…</div>`;
+  try{
+    const data = await Promise.all(state.compare.map(c=>compareFetch(c.kind,c.id)));
+    const rows = [
+      ['Works', d=>d.works],
+      ['Citations', d=>d.cites],
+      ['h-index', d=>d.h],
+      ['i10-index', d=>d.i10],
+      ['2-yr mean citedness', d=> d.twoyr!=null ? d.twoyr.toFixed(2) : null],
+    ];
+    const best = rows.map(([,f])=> Math.max(...data.map(d=>{ const v=f(d); const n=typeof v==='number'?v:parseFloat(v); return isFinite(n)?n:-Infinity; })));
+    modal.innerHTML = `
+      <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+      <div class="m-kind">Compare</div>
+      <div class="m-title" style="font-size:1.35rem">Side by side</div>
+      <div class="cmp-table-wrap"><table class="cmp-table">
+        <thead><tr><th></th>${data.map(d=>`<th><a href="https://openalex.org/${d.id}" target="_blank" rel="noopener">${esc(d.name)}</a><div class="cmp-kind">${d.kind}</div></th>`).join('')}</tr></thead>
+        <tbody>${rows.map(([label,f],ri)=>`<tr><th>${label}</th>${data.map(d=>{ const v=f(d); const nv=typeof v==='number'?v:parseFloat(v); const isBest=isFinite(nv)&&nv===best[ri]; return `<td class="${isBest?'cmp-best':''}">${v==null?'—':(typeof v==='number'?num(v):v)}</td>`; }).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      <div class="note" style="margin-top:8px">Live from OpenAlex. Best value in each row highlighted.</div>`;
+  }catch(err){
+    modal.innerHTML = `<button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button><div class="note err" style="padding:14px 0">Couldn’t load comparison: ${esc(err.message)}</div>`;
+  }
 }
 
 /* ── World map ─────────────────────────────────────────────── */
