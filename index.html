@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>ScholarScope — Institutions & authors in social science & management</title>
-<meta name="description" content="A live directory of the institutions, schools, journals, and authors that lead social science & management research. Every record is a real OpenAlex entity — search anyone, or browse the leaders in a field." />
+<title>ScholarScope — Who leads & where to publish in social science & management</title>
+<meta name="description" content="A live directory of the institutions, journals, and authors that lead social science & management research — every record a real OpenAlex entity — plus a Publish desk that matches your paper to journals by turnaround, quartile and fit." />
 <meta name="theme-color" content="#FBF7EF" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='url(%23g)'/><text x='50%25' y='57%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='900' font-size='16' fill='white'>S</text><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23FF9656'/><stop offset='52%25' stop-color='%23F14575'/><stop offset='100%25' stop-color='%239270F4'/></linearGradient></defs></svg>" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,6 +197,75 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--magenta);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 @media(max-width:560px){.hero{padding:30px 0 16px;}.bar-tag{display:none;}}
+
+/* ── Publish desk (journal finder + turnaround browser + analytics) ── */
+#publishArea{margin-top:18px;}
+.pub-h{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;letter-spacing:-.02em;margin:26px 0 3px;}
+.pub-h:first-child{margin-top:6px;}
+.pub-sub{font-size:.82rem;color:var(--ink-faint);margin-bottom:14px;}
+.pub-block{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;}
+/* Find My Journal */
+.pf-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end;}
+.pf-field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+.pf-sel,.pub-sort{width:100%;font-family:inherit;font-size:.9rem;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:10px 11px;cursor:pointer;}
+.pf-btn{font-family:inherit;font-weight:700;font-size:.85rem;color:#fff;background:var(--grad);border:0;border-radius:10px;padding:11px 18px;cursor:pointer;}
+.pf-cards{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.pf-card{flex:1 1 220px;max-width:300px;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:13px 15px;cursor:pointer;transition:.15s;}
+.pf-card:hover{border-color:var(--violet);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.pf-rank{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--magenta);}
+.pf-name{font-weight:700;font-size:.95rem;letter-spacing:-.01em;margin:3px 0 5px;line-height:1.25;}
+.pf-line{font-size:.78rem;color:var(--ink-soft);}
+.pf-line.dim{color:var(--ink-faint);margin-top:2px;}
+/* Browser filter bar */
+.pub-bar{display:flex;flex-direction:column;gap:11px;margin-bottom:12px;}
+.pub-bar .row2{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.pub-count{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-faint);}
+.pub-count b{color:var(--magenta);}
+.pub-toggle{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--ink-soft);cursor:pointer;user-select:none;}
+.pub-toggle input{accent-color:var(--magenta);}
+.pub-slider{accent-color:var(--magenta);}
+/* Table */
+.pub-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--paper-2);}
+.pub-table{border-collapse:collapse;width:100%;font-size:.84rem;min-width:760px;}
+.pub-table thead th{position:sticky;top:0;background:var(--paper-3);color:var(--ink-soft);font-weight:700;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;text-align:right;padding:10px 12px;white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--line);}
+.pub-table thead th:nth-child(2),.pub-table thead th:nth-child(3){text-align:left;}
+.pub-table thead th.sorted{color:var(--magenta);}
+.pub-table tbody td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
+.pub-table tbody tr{cursor:pointer;transition:.1s;}
+.pub-table tbody tr:hover{background:var(--paper-3);}
+.pub-table tbody tr:last-child td{border-bottom:0;}
+.pt-name{text-align:left!important;font-weight:600;color:var(--ink);max-width:320px;white-space:normal;}
+.pt-name small{display:block;font-weight:400;font-size:.72rem;color:var(--ink-faint);}
+.pt-field{text-align:left!important;font-size:.78rem;color:var(--ink-soft);}
+.pt-fdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.star{background:none;border:0;cursor:pointer;font-size:15px;color:var(--ink-faint);transition:.15s;}
+.star.on{color:#e0a82e;}
+.q-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:5px;border:1px solid var(--line);}
+.q-Q1{color:#1b8a5a;border-color:color-mix(in srgb,#1b8a5a 40%,transparent);}
+.q-Q2{color:#2f7dd1;border-color:color-mix(in srgb,#2f7dd1 40%,transparent);}
+.q-Q3{color:#c97a1a;border-color:color-mix(in srgb,#c97a1a 40%,transparent);}
+.q-Q4{color:var(--ink-faint);}
+.spd{display:inline-flex;align-items:center;gap:7px;justify-content:flex-end;}
+.spd-bar-wrap{width:46px;height:5px;border-radius:3px;background:var(--paper-3);overflow:hidden;}
+.spd-bar{height:5px;border-radius:3px;}
+.spd-val{font-family:'IBM Plex Mono',monospace;font-weight:600;min-width:34px;}
+.ar{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.ar.lo{color:#c0392b;} .ar.mid{color:#c97a1a;} .ar.hi{color:#1b8a5a;}
+.oa-pill{display:inline-block;font-size:.6rem;font-weight:700;color:#1b8a5a;border:1px solid color-mix(in srgb,#1b8a5a 40%,transparent);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle;}
+.src{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);}
+.src.src-publisher{color:var(--ink-soft);}
+.src.src-estimated{color:#c97a1a;border-color:color-mix(in srgb,#c97a1a 40%,transparent);}
+.src.src-community{color:var(--violet);border-color:color-mix(in srgb,var(--violet) 40%,transparent);}
+/* Analytics */
+.pub-dash{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pub-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:15px 16px;min-width:0;}
+.pub-card.wide{grid-column:1/-1;}
+.pub-card h4{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:baseline;gap:8px;}
+.pub-card h4 .hint{font-family:'Plus Jakarta Sans';font-size:.64rem;text-transform:none;letter-spacing:0;color:var(--ink-faint);margin-left:auto;}
+.pub-tip{position:fixed;z-index:200;display:none;pointer-events:none;background:var(--ink);color:var(--paper);font-size:.76rem;line-height:1.4;padding:7px 11px;border-radius:9px;box-shadow:var(--shadow-sm);max-width:240px;}
+.pub-tip b{font-weight:700;}
+.pub-est-note{font-size:.76rem;color:var(--ink-faint);margin:14px 0 2px;}
+@media(max-width:680px){.pub-dash{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -214,9 +283,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
 <main class="wrap">
   <section class="hero">
-    <div class="kicker">Institutions · Schools · Journals · Authors</div>
-    <h1>Who leads <span class="hl">social science &amp; management</span> research?</h1>
-    <p>A live directory of the institutions, schools, journals, and scholars shaping the field. Every record is a real <strong>OpenAlex</strong> entity — browse the leaders in a discipline, or search anyone by name.</p>
+    <div class="kicker">Institutions · Authors · Journals · Where to publish</div>
+    <h1>Who leads — and where to publish in — <span class="hl">social science &amp; management</span>?</h1>
+    <p>A live directory of the institutions, journals, and scholars shaping the field — every record a real <strong>OpenAlex</strong> entity — plus a <strong>Publish</strong> desk that matches your paper to journals by turnaround, quartile and fit.</p>
   </section>
 
   <section class="controls">
@@ -225,6 +294,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
         <button data-mode="leaders" class="on">🏆 Leaders</button>
         <button data-mode="map">🗺 Map</button>
         <button data-mode="search">🔎 Search</button>
+        <button data-mode="publish">📮 Publish</button>
       </div>
       <div class="seg" id="kindSeg">
         <button data-kind="institutions" class="on">Institutions</button>
@@ -271,6 +341,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   <div class="list" id="results"></div>
   <div id="leadMore"></div>
   <div id="mapArea" style="display:none"></div>
+  <div id="publishArea" style="display:none"></div>
 
   <div class="foot">
     <span>Live data from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> · no data is invented — open any record to verify.</span>
@@ -280,7 +351,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
 <div class="map-tip" id="mapTip"></div>
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div class="pub-tip" id="pubTip"></div>
 
+<!-- Curated journal turnaround data (1,959 Scopus journals) — merged in from
+     JournalTime's journal-finder. Each record carries a `source`
+     (publisher / estimated / community) surfaced as a badge: nothing invented. -->
+<script src="journals.js"></script>
 <script>
 const OA = 'https://api.openalex.org';
 // OpenAlex "polite pool": including a contact mailto gets faster, more reliable
@@ -343,16 +419,18 @@ function refreshField(){ if(state.mode==='map') runMap(); else if(state.mode==='
 $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   state.mode=b.dataset.mode; state.drillA2=null;
   $('#modeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  const isMap=state.mode==='map', isSearch=state.mode==='search';
+  const isMap=state.mode==='map', isSearch=state.mode==='search', isPub=state.mode==='publish';
   $('#leadersControls').style.display = (state.mode==='leaders'||isMap)?'':'none'; // field picker drives both
   $('#searchControls').style.display = isSearch?'':'none';
-  $('#kindSeg').style.display = isMap?'none':''; // Map has its own view switch
+  $('#kindSeg').style.display = (isMap||isPub)?'none':''; // Map + Publish have their own surface
   $('#mapViewRow').style.display = isMap?'':'none';
   $('#mapArea').style.display = isMap?'':'none';
-  $('#results').style.display = isMap?'none':'';
+  $('#publishArea').style.display = isPub?'':'none';
+  $('#results').style.display = (isMap||isPub)?'none':'';
   $('#leadHead').innerHTML=''; $('#status').innerHTML=''; $('#leadMore').innerHTML='';
   if(state.mode==='leaders'){ $('#results').innerHTML=''; runLeaders(); }
   else if(isMap){ runMap(); }
+  else if(isPub){ initPublish(); }
   else { $('#results').innerHTML=''; }
 });
 $('#kindSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
@@ -834,6 +912,335 @@ function zoomToCountry(a2){
 }
 document.addEventListener('click', e=>{ if(e.target.closest('#mapBack')) exitDrill(); });
 window.addEventListener('scroll', hideTip, { passive:true });
+
+/* ══ Publish desk ════════════════════════════════════════════════
+   Curated journal turnaround data (1,959 Scopus journals) merged in from
+   JournalTime's journal-finder. Pure client-side over window.__JOURNAL_DATA__.
+   Every record's `source` (publisher / estimated / community) is badged —
+   ScholarScope's no-fabrication rule holds: estimated values are labelled,
+   never passed off as measured. Cross-links to live OpenAlex profiles. ── */
+const PUB = {
+  data: window.__JOURNAL_DATA__ || [],
+  fields: window.__FIELDS__ || [],
+  meta: window.__JOURNAL_META__ || {},
+  ready: false,
+  shortlist: new Set((()=>{ try{return JSON.parse(localStorage.getItem('ss_shortlist')||'[]');}catch(e){return [];} })()),
+  f: { field:'', quartiles:null, oaOnly:false, maxSpeed:120, search:'', sort:'first_decision_asc' },
+};
+const FCOLORS = {
+  "Multidisciplinary":"#7c3aed","Medicine":"#dc2626","Biology":"#16a34a","Economics":"#0369a1",
+  "Psychology":"#db2777","Environmental Science":"#059669","Physics & Chemistry":"#9333ea",
+  "Engineering":"#b45309","Education":"#0891b2","Mathematics":"#4338ca","Management":"#0f766e",
+  "Organizational Behaviour":"#be185d","Accounting & Finance":"#c2410c","Information Systems":"#0284c7",
+  "Public Administration":"#4d7c0f","Library & Information Science":"#1e40af",
+  "Food Science & Nutrition":"#65a30d","Social Work":"#c026d3",
+};
+const fcolor = f => FCOLORS[f] || '#8C8498';
+const speedColor = d => d<=14?'#1b8a5a':d<=30?'#16a34a':d<=60?'#c97a1a':d<=90?'#e0742a':'#c0392b';
+const speedLabel = d => d<=14?'Very fast':d<=30?'Fast':d<=60?'Moderate':d<=90?'Slow':'Very slow';
+const speedPct = d => Math.min(100, Math.round((d/120)*100));
+const arInfo = r => r<=10?['lo','hard']:r<=30?['mid','selective']:['hi','accessible'];
+const srcLabel = s => s==='publisher'?'Publisher':s==='community'?'Community':'Estimated';
+
+// d3 only (lighter than mapLibs, which also pulls topojson + the world atlas).
+let _d3p = null;
+function ensureD3(){ if(window.d3) return Promise.resolve(window.d3); if(!_d3p) _d3p = loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js').then(()=>window.d3); return _d3p; }
+
+const pubTip = $('#pubTip');
+function showPubTip(e,html){ pubTip.innerHTML=html; pubTip.style.display='block'; pubTip.style.left=(e.clientX+13)+'px'; pubTip.style.top=(e.clientY+13)+'px'; }
+function hidePubTip(){ pubTip.style.display='none'; }
+
+const SORTS = [
+  ['first_decision_asc','First decision · fastest'],['first_decision_desc','First decision · slowest'],
+  ['time_to_acceptance_asc','Acceptance time · fastest'],['acceptance_rate_desc','Acceptance rate · easiest'],
+  ['acceptance_rate_asc','Acceptance rate · hardest'],['impact_factor_desc','Impact factor · highest'],
+  ['name_asc','Name A→Z'],
+];
+
+function initPublish(){
+  if(PUB.ready){ return; }
+  if(!PUB.data.length){ $('#publishArea').innerHTML='<div class="note err" style="margin-top:20px">Journal data could not be loaded.</div>'; return; }
+  PUB.ready = true;
+  const presentQ = [...new Set(PUB.data.map(j=>j.quartile))].sort();
+  PUB.f.quartiles = new Set(presentQ);
+  const est = PUB.data.filter(j=>j.source!=='publisher').length;
+  const fieldOpts = '<option value="">Any field</option>' + PUB.fields.map(f=>`<option value="${esc(f)}">${esc(f)}</option>`).join('');
+  $('#publishArea').innerHTML = `
+    <div class="pub-h">📮 Find my journal</div>
+    <div class="pub-sub">Match your paper to a journal by field, quartile, access and how fast you need a first decision — ranked by speed.</div>
+    <div class="pub-block">
+      <div class="pf-form">
+        <div class="pf-field"><label>Field</label><select class="pf-sel" id="pfField">${fieldOpts}</select></div>
+        <div class="pf-field"><label>Min quartile</label><select class="pf-sel" id="pfQ"><option value="">Any</option><option value="Q1">Q1 only</option><option value="Q1,Q2">Q1 or Q2</option></select></div>
+        <div class="pf-field"><label>Access</label><select class="pf-sel" id="pfOA"><option value="">Any</option><option value="oa">Open access</option><option value="sub">Subscription</option></select></div>
+        <div class="pf-field"><label>Max wait (days)</label><input class="pf-sel" id="pfMax" type="number" min="7" max="365" placeholder="e.g. 30"></div>
+        <div class="pf-field"><button class="pf-btn" id="pfBtn">Find journals →</button></div>
+      </div>
+      <div class="pf-cards" id="pfCards"></div>
+    </div>
+
+    <div class="pub-h">Browse journals</div>
+    <div class="pub-sub">${num(PUB.data.length)} journals with first-decision, acceptance-time and acceptance-rate data. Click any row for details and live metrics.</div>
+    <div class="pub-bar">
+      <div class="row2">
+        <div class="ac" style="flex:1 1 280px;max-width:420px"><input class="input" id="pbSearch" placeholder="Search journal or publisher…" autocomplete="off"></div>
+        <span class="lbl">Field</span><select class="pub-sort" id="pbFieldSel" style="width:auto;max-width:220px">${fieldOpts}</select>
+      </div>
+      <div class="row2">
+        <span class="lbl">Quartile</span><div class="chips" id="pbQ">${presentQ.map(q=>`<button class="chip on" data-q="${q}">${q}</button>`).join('')}</div>
+        <label class="pub-toggle"><input type="checkbox" id="pbOA"> Open access only</label>
+      </div>
+      <div class="row2">
+        <span class="lbl">Max first decision</span>
+        <input class="pub-slider" id="pbSpeed" type="range" min="7" max="120" value="120" style="flex:1;max-width:240px">
+        <span class="pub-count" id="pbSpeedVal">Any</span>
+        <span style="flex:1"></span>
+        <span class="lbl">Sort</span><select class="pub-sort" id="pbSort" style="width:auto">${SORTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+      </div>
+      <div class="row2">
+        <span class="pub-count"><b id="pbCount">0</b> journals shown</span>
+        <span style="flex:1"></span>
+        <button class="cmp-go" id="pbCmp" style="display:none"></button>
+      </div>
+    </div>
+    <div class="pub-table-wrap">
+      <table class="pub-table">
+        <thead><tr>
+          <th title="Shortlist to compare">★</th>
+          <th data-col="name">Journal</th><th data-col="field">Field</th><th data-col="quartile">Q</th>
+          <th data-col="first_decision">First decision</th><th data-col="time_to_acceptance">Acceptance</th>
+          <th data-col="acceptance_rate">Accept&nbsp;rate</th><th data-col="impact_factor">IF</th><th>Source</th>
+        </tr></thead>
+        <tbody id="pbBody"></tbody>
+      </table>
+    </div>
+    <div class="pub-est-note">${num(est)} of ${num(PUB.data.length)} journals carry <b>estimated</b> turnaround (badged); the rest are publisher-stated or community-reported. Nothing is invented — every value shows its source.</div>
+
+    <div class="pub-h">At a glance</div>
+    <div class="pub-sub">Turnaround patterns across the dataset.</div>
+    <div class="pub-dash">
+      <div class="pub-card"><h4>Avg first decision by field</h4><svg id="pubBar"></svg></div>
+      <div class="pub-card"><h4>Impact factor vs wait <span class="hint">bubble = acceptance rate</span></h4><svg id="pubScatter"></svg></div>
+      <div class="pub-card wide"><h4>Fastest publishers <span class="hint">≥3 journals tracked</span></h4><div id="pubRank"></div></div>
+    </div>`;
+
+  // ── Find My Journal ──
+  $('#pfBtn').onclick = () => {
+    const field=$('#pfField').value, q=$('#pfQ').value, oa=$('#pfOA').value;
+    const maxd=parseInt($('#pfMax').value)||9999;
+    const res = PUB.data.filter(j=>{
+      if(field && j.field!==field) return false;
+      if(q==='Q1' && j.quartile!=='Q1') return false;
+      if(q==='Q1,Q2' && j.quartile!=='Q1' && j.quartile!=='Q2') return false;
+      if(oa==='oa' && !j.open_access) return false;
+      if(oa==='sub' && j.open_access) return false;
+      if(j.first_decision>maxd) return false;
+      return true;
+    }).sort((a,b)=>a.first_decision-b.first_decision).slice(0,6);
+    const c=$('#pfCards');
+    if(!res.length){ c.innerHTML='<div class="note" style="color:var(--ink-faint)">No matches — try relaxing your criteria.</div>'; return; }
+    c.innerHTML = res.map((j,i)=>`
+      <button class="pf-card" data-id="${j.id}">
+        <div class="pf-rank">#${i+1} · ${speedLabel(j.first_decision)}</div>
+        <div class="pf-name">${esc(j.name)}</div>
+        <div class="pf-line">First decision <b style="color:${speedColor(j.first_decision)}">${j.first_decision}d</b> · acceptance ${j.time_to_acceptance}d</div>
+        <div class="pf-line dim">${j.quartile} · IF ${j.impact_factor} · ${j.acceptance_rate}% accept${j.open_access?' · OA':''}</div>
+      </button>`).join('');
+    c.querySelectorAll('.pf-card').forEach(el=>el.onclick=()=>openJournalDetail(PUB.data.find(x=>x.id===+el.dataset.id)));
+  };
+
+  // ── Browser filters ──
+  $('#pbSearch').addEventListener('input', e=>{ PUB.f.search=e.target.value.trim().toLowerCase(); renderPubTable(); });
+  $('#pbFieldSel').addEventListener('change', e=>{ PUB.f.field=e.target.value; renderPubTable(); });
+  $('#pbQ').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+    const q=b.dataset.q; if(PUB.f.quartiles.has(q)) PUB.f.quartiles.delete(q); else PUB.f.quartiles.add(q);
+    b.classList.toggle('on', PUB.f.quartiles.has(q)); renderPubTable(); });
+  $('#pbOA').addEventListener('change', e=>{ PUB.f.oaOnly=e.target.checked; renderPubTable(); });
+  $('#pbSpeed').addEventListener('input', e=>{ const v=+e.target.value; PUB.f.maxSpeed=v; $('#pbSpeedVal').textContent = v>=120?'Any':('≤'+v+'d'); renderPubTable(); });
+  $('#pbSort').addEventListener('change', e=>{ PUB.f.sort=e.target.value; renderPubTable(); });
+  $('#publishArea').querySelectorAll('.pub-table thead th[data-col]').forEach(th=>{
+    th.onclick = () => { const col=th.dataset.col; const asc=PUB.f.sort===col+'_asc'; PUB.f.sort=col+(asc?'_desc':'_asc'); $('#pbSort').value=SORTS.some(s=>s[0]===PUB.f.sort)?PUB.f.sort:$('#pbSort').value; renderPubTable(); };
+  });
+  $('#pbCmp').onclick = openPubCompare;
+
+  renderPubTable();
+  updatePubCmp();
+  ensureD3().then(()=>{ drawPubBar(); drawPubScatter(); drawPubRank(); }).catch(()=>{
+    $('#pubBar').closest('.pub-dash').innerHTML = '<div class="note" style="color:var(--ink-faint)">Charts need d3 (offline?).</div>';
+  });
+}
+
+function pubFiltered(){
+  const f=PUB.f;
+  return PUB.data.filter(j=>{
+    if(f.field && j.field!==f.field) return false;
+    if(f.quartiles && !f.quartiles.has(j.quartile)) return false;
+    if(f.oaOnly && !j.open_access) return false;
+    if(f.maxSpeed<120 && j.first_decision>f.maxSpeed) return false;
+    if(f.search && !j.name.toLowerCase().includes(f.search) && !j.publisher.toLowerCase().includes(f.search)) return false;
+    return true;
+  });
+}
+function pubSorted(arr){
+  const m=PUB.f.sort.match(/^(.*)_(asc|desc)$/); const col=m[1], dir=m[2];
+  return [...arr].sort((a,b)=>{ const va=a[col], vb=b[col];
+    if(typeof va==='string') return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    return dir==='asc'?va-vb:vb-va; });
+}
+function renderPubTable(){
+  const rows = pubSorted(pubFiltered());
+  $('#pbCount').textContent = num(rows.length);
+  $('#publishArea').querySelectorAll('.pub-table thead th[data-col]').forEach(th=>{
+    const s=PUB.f.sort.startsWith(th.dataset.col+'_'); th.classList.toggle('sorted',s);
+  });
+  const body=$('#pbBody');
+  body.innerHTML = rows.map(j=>{
+    const col=speedColor(j.first_decision), pct=speedPct(j.first_decision), [arc]=arInfo(j.acceptance_rate);
+    const star=PUB.shortlist.has(j.id);
+    return `<tr data-id="${j.id}">
+      <td style="text-align:center"><button class="star${star?' on':''}" data-star="${j.id}" title="Shortlist to compare">${star?'★':'☆'}</button></td>
+      <td class="pt-name">${esc(j.name)}${j.open_access?'<span class="oa-pill">OA</span>':''}<small>${esc(j.publisher)}</small></td>
+      <td class="pt-field"><span class="pt-fdot" style="background:${fcolor(j.field)}"></span>${esc(j.field)}</td>
+      <td><span class="q-badge q-${j.quartile}">${j.quartile}</span></td>
+      <td><span class="spd"><span class="spd-bar-wrap"><span class="spd-bar" style="width:${pct}%;background:${col}"></span></span><span class="spd-val" style="color:${col}">${j.first_decision}d</span></span></td>
+      <td>${j.time_to_acceptance}d</td>
+      <td><span class="ar ${arc}">${j.acceptance_rate}%</span></td>
+      <td>${j.impact_factor}</td>
+      <td><span class="src src-${j.source}">${srcLabel(j.source)}</span></td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('tr').forEach(tr=>{
+    tr.onclick = e => { if(e.target.closest('.star')) return; openJournalDetail(PUB.data.find(x=>x.id===+tr.dataset.id)); };
+  });
+  body.querySelectorAll('.star').forEach(b=>{ b.onclick = e => { e.stopPropagation(); togglePubStar(+b.dataset.star); }; });
+}
+function togglePubStar(id){
+  if(PUB.shortlist.has(id)) PUB.shortlist.delete(id); else PUB.shortlist.add(id);
+  try{ localStorage.setItem('ss_shortlist', JSON.stringify([...PUB.shortlist])); }catch(e){}
+  renderPubTable(); updatePubCmp();
+}
+function updatePubCmp(){
+  const b=$('#pbCmp'); if(!b) return;
+  if(PUB.shortlist.size>=2){ b.style.display=''; b.textContent=`Compare ${PUB.shortlist.size} →`; }
+  else b.style.display='none';
+}
+
+// Curated journal detail (reuses the profile modal) + cross-link to live OpenAlex.
+function openJournalDetail(j){
+  if(!j) return;
+  const m = PUB.meta[j.id] || {};
+  const [arc,arword]=arInfo(j.acceptance_rate);
+  scrim.classList.add('show');
+  modal.innerHTML = `
+    <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+    <div class="m-kind">Journal · where to publish</div>
+    <div class="m-title">${esc(j.name)}</div>
+    <div class="m-meta">${esc(j.publisher)} · ${esc(j.field)}${j.open_access?' · Open access':''} · <span class="src src-${j.source}">${srcLabel(j.source)} data</span></div>
+    <div class="stats">
+      ${statBox(`<span style="color:${speedColor(j.first_decision)}">${j.first_decision}d</span>`,'First decision')}
+      ${statBox(j.time_to_acceptance+'d','To acceptance')}
+      ${statBox(`<span class="ar ${arc}">${j.acceptance_rate}%</span>`,'Accept rate · '+arword)}
+      ${statBox('<span class="q-badge q-'+j.quartile+'">'+j.quartile+'</span>','Quartile · IF '+j.impact_factor)}
+    </div>
+    ${m.description?`<div class="m-sec"><h4>About</h4><div class="note" style="color:var(--ink-soft)">${esc(m.description)}</div></div>`:''}
+    ${m.themes&&m.themes.length?`<div class="m-sec"><h4>Typical themes</h4><div class="tags">${m.themes.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>`:''}
+    ${m.gap_areas&&m.gap_areas.length?`<div class="m-sec"><h4>Under-served areas</h4><div class="tags">${m.gap_areas.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>`:''}
+    <div class="m-links">
+      <button class="m-link grad" id="jd-live" data-name="${esc(j.name)}">Live metrics ↗</button>
+      <button class="m-link" onclick="togglePubStar(${j.id});this.textContent=window.SS_inShort(${j.id})?'✓ Shortlisted':'＋ Compare'">${PUB.shortlist.has(j.id)?'✓ Shortlisted':'＋ Compare'}</button>
+    </div>
+    <div class="note" style="margin-top:10px;color:var(--ink-faint);font-size:.76rem">Turnaround &amp; acceptance figures are <b>${srcLabel(j.source).toLowerCase()}</b>-sourced${j.source==='estimated'?' (an estimate, not a measured value)':''}. "Live metrics" pulls this journal's real citation record from OpenAlex.</div>`;
+  const live=$('#jd-live');
+  if(live) live.onclick = () => resolveJournalToOA(j.name, live);
+}
+window.SS_inShort = id => PUB.shortlist.has(id);
+
+// Resolve a curated journal name → its OpenAlex source, then open the live profile.
+async function resolveJournalToOA(name, btn){
+  const old=btn.textContent; btn.textContent='Finding…'; btn.disabled=true;
+  try{
+    const d = await getJSON(`${OA}/autocomplete/sources?q=${encodeURIComponent(name)}`);
+    const hit = (d.results||[]).find(r=>r.id);
+    if(hit){ openProfile('journals', shortId(hit.id)); }
+    else { btn.textContent='No OpenAlex match'; setTimeout(()=>{btn.textContent=old;btn.disabled=false;},1800); }
+  }catch(e){ btn.textContent='Lookup failed'; setTimeout(()=>{btn.textContent=old;btn.disabled=false;},1800); }
+}
+
+function openPubCompare(){
+  const items = [...PUB.shortlist].map(id=>PUB.data.find(j=>j.id===id)).filter(Boolean);
+  if(items.length<2) return;
+  scrim.classList.add('show');
+  const rows = [
+    ['First decision', j=>j.first_decision, 'min', v=>v+'d'],
+    ['To acceptance', j=>j.time_to_acceptance, 'min', v=>v+'d'],
+    ['Acceptance rate', j=>j.acceptance_rate, 'max', v=>v+'%'],
+    ['Impact factor', j=>j.impact_factor, 'max', v=>v],
+    ['Quartile', j=>j.quartile, null, v=>v],
+    ['Access', j=>j.open_access?'OA':'Subscription', null, v=>v],
+    ['Field', j=>j.field, null, v=>v],
+    ['Data source', j=>srcLabel(j.source), null, v=>v],
+  ];
+  const best = rows.map(([,f,dir])=>{ if(!dir) return null; const vals=items.map(f).filter(v=>typeof v==='number'); return dir==='min'?Math.min(...vals):Math.max(...vals); });
+  modal.innerHTML = `
+    <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
+    <div class="m-kind">Compare · where to publish</div>
+    <div class="m-title" style="font-size:1.35rem">Side by side</div>
+    <div class="cmp-table-wrap"><table class="cmp-table">
+      <thead><tr><th></th>${items.map(j=>`<th>${esc(j.name)}<div class="cmp-kind">${esc(j.publisher.split('/')[0].trim())}</div></th>`).join('')}</tr></thead>
+      <tbody>${rows.map(([label,f,dir,fmt],ri)=>`<tr><th>${label}</th>${items.map(j=>{ const v=f(j); const isBest=dir&&v===best[ri]; return `<td class="${isBest?'cmp-best':''}">${fmt(v)}</td>`; }).join('')}</tr>`).join('')}</tbody>
+    </table></div>
+    <div class="note" style="margin-top:8px">Best value in each comparable row highlighted. Turnaround figures carry their own source badge — see each journal's detail.</div>`;
+}
+
+// ── Analytics ──
+function drawPubBar(){
+  const d3=window.d3, el=$('#pubBar'); const W=(el.parentElement.clientWidth||420)-32;
+  const fa = PUB.fields.map(f=>{ const js=PUB.data.filter(j=>j.field===f); return {f, avg: js.length?Math.round(js.reduce((s,j)=>s+j.first_decision,0)/js.length):0}; })
+    .filter(d=>d.avg).sort((a,b)=>a.avg-b.avg);
+  const mL=132, mR=42, h=fa.length*17+8, w=W-mL-mR;
+  const svg=d3.select(el).attr('width',W).attr('height',h); svg.selectAll('*').remove();
+  const g=svg.append('g').attr('transform',`translate(${mL},2)`);
+  const x=d3.scaleLinear().domain([0,d3.max(fa,d=>d.avg)*1.15]).range([0,w]);
+  const y=d3.scaleBand().domain(fa.map(d=>d.f)).range([0,h-6]).padding(.24);
+  g.selectAll('rect').data(fa).join('rect').attr('x',0).attr('y',d=>y(d.f)).attr('width',d=>x(d.avg)).attr('height',y.bandwidth()).attr('rx',3).attr('fill',d=>speedColor(d.avg)).attr('opacity',.88);
+  g.selectAll('.v').data(fa).join('text').attr('x',d=>x(d.avg)+5).attr('y',d=>y(d.f)+y.bandwidth()/2+3.5).attr('font-size','9.5px').attr('fill','var(--ink-faint)').text(d=>d.avg+'d');
+  g.selectAll('.l').data(fa).join('text').attr('x',-6).attr('y',d=>y(d.f)+y.bandwidth()/2+3.5).attr('text-anchor','end').attr('font-size','9.5px').attr('fill','var(--ink-soft)').text(d=>d.f.length>20?d.f.slice(0,19)+'…':d.f);
+}
+function drawPubScatter(){
+  const d3=window.d3, el=$('#pubScatter'); const W=(el.parentElement.clientWidth||420)-32, H=210;
+  const m={t:8,r:14,b:30,l:40}, w=W-m.l-m.r, h=H-m.t-m.b;
+  const svg=d3.select(el).attr('width',W).attr('height',H); svg.selectAll('*').remove();
+  const g=svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+  const pts=PUB.data.filter(d=>d.impact_factor>0&&d.impact_factor<100);
+  const x=d3.scaleLinear().domain([0,d3.max(pts,d=>d.impact_factor)*1.05]).range([0,w]);
+  const y=d3.scaleLinear().domain([0,d3.max(pts,d=>d.time_to_acceptance)*1.05]).range([h,0]);
+  const r=d3.scaleSqrt().domain([0,d3.max(pts,d=>d.acceptance_rate)]).range([1.5,7]);
+  const axStyle=ax=>{ax.selectAll('text').attr('font-size','8.5px').attr('fill','var(--ink-faint)');ax.select('.domain').attr('stroke','var(--line)');ax.selectAll('.tick line').attr('stroke','var(--line)');};
+  g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).ticks(5).tickSize(3)).call(axStyle);
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(3)).call(axStyle);
+  g.append('text').attr('x',w/2).attr('y',h+26).attr('text-anchor','middle').attr('font-size','8.5px').attr('fill','var(--ink-faint)').text('Impact factor');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-h/2).attr('y',-30).attr('text-anchor','middle').attr('font-size','8.5px').attr('fill','var(--ink-faint)').text('Days to acceptance');
+  g.selectAll('circle').data(pts).join('circle').attr('cx',d=>x(d.impact_factor)).attr('cy',d=>y(d.time_to_acceptance)).attr('r',d=>r(d.acceptance_rate)).attr('fill',d=>fcolor(d.field)).attr('opacity',.6).attr('stroke','var(--paper-2)').attr('stroke-width',.5)
+    .on('mousemove',(e,d)=>showPubTip(e,`<b>${esc(d.name)}</b><br>${esc(d.field)}<br>IF ${d.impact_factor} · ${d.time_to_acceptance}d · ${d.acceptance_rate}% accept`)).on('mouseleave',hidePubTip);
+}
+function drawPubRank(){
+  const pm={}; PUB.data.forEach(j=>{ (pm[j.publisher]=pm[j.publisher]||{s:0,n:0}).s+=j.first_decision; pm[j.publisher].n++; });
+  const ranked=Object.entries(pm).filter(([,v])=>v.n>=3).map(([p,v])=>({p,avg:Math.round(v.s/v.n),n:v.n})).sort((a,b)=>a.avg-b.avg).slice(0,10);
+  const max=ranked.length?ranked[ranked.length-1].avg:120;
+  $('#pubRank').innerHTML = ranked.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:var(--ink-faint);width:14px;text-align:right">${i+1}</span>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:2px">
+          <span style="font-size:.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.p.split('/')[0].trim())}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:.74rem;font-weight:700;color:${speedColor(r.avg)}">${r.avg}d</span>
+        </div>
+        <div style="background:var(--paper-3);border-radius:3px;height:5px"><div style="width:${Math.round((r.avg/max)*100)}%;height:5px;border-radius:3px;background:${speedColor(r.avg)}"></div></div>
+        <div style="font-size:.64rem;color:var(--ink-faint);margin-top:1px">${r.n} journals</div>
+      </div>
+    </div>`).join('');
+}
+window.addEventListener('scroll', hidePubTip, { passive:true });
 
 /* ── Boot ── */
 runLeaders();
