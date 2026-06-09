@@ -1305,5 +1305,30 @@ addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target
   addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd,{passive:true});upd();
 })();
 </script>
+
+<!-- syed-magnet: magnetic pull on primary CTAs (desktop hover, reduced-motion aware; no-ops if nothing matches) -->
+<script>
+(function(){
+  if(document.getElementById('syed-magnet-flag'))return;
+  var f=document.createElement('meta');f.id='syed-magnet-flag';(document.head||document.documentElement).appendChild(f);
+  if(!window.matchMedia)return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
+  var SEL='.btn-fill,.hero-btn,.btn-gold,.lnk.lp,.syed-link-all,.cta,.ic-add,[data-magnetic]';
+  function bind(el){
+    if(el.__mag)return;el.__mag=1;
+    el.addEventListener('pointermove',function(e){
+      var r=el.getBoundingClientRect();
+      var x=Math.max(-9,Math.min(9,(e.clientX-(r.left+r.width/2))*0.3));
+      var y=Math.max(-9,Math.min(9,(e.clientY-(r.top+r.height/2))*0.4));
+      el.style.transform='translate('+x+'px,'+y+'px)';
+    });
+    el.addEventListener('pointerleave',function(){el.style.transform='';});
+  }
+  function scan(){document.querySelectorAll(SEL).forEach(bind);}
+  if(document.readyState!=='loading')scan();else addEventListener('DOMContentLoaded',scan);
+  setTimeout(scan,1500);
+})();
+</script>
 </body>
 </html>
