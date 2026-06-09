@@ -1289,5 +1289,21 @@ if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)ret
 addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target.closest&&e.target.closest('button,a,[role=button],input[type=button],input[type=submit],summary,.btn,[class*=btn]');if(!t)return;var b=document.createElement('span');b.className='syed-burst';b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.color=getComputedStyle(t).color;document.body.appendChild(b);setTimeout(function(){b.remove()},520);},{passive:true});
 })();
 </script>
+
+<!-- syed-motion: scroll-progress bar (self-installing, reduced-motion aware) -->
+<script>
+(function(){
+  if(document.getElementById('syed-motion-style'))return;
+  var grad='linear-gradient(135deg,#FF9656 0%,#F14575 55%,#9270F4 100%)';
+  var st=document.createElement('style');st.id='syed-motion-style';
+  st.textContent='#syed-scroll-prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:100000;background:'+grad+';box-shadow:0 0 10px rgba(241,69,117,.45);transition:width .12s linear;pointer-events:none}@media (prefers-reduced-motion:reduce){#syed-scroll-prog{display:none}}';
+  document.head.appendChild(st);
+  var bar=document.createElement('div');bar.id='syed-scroll-prog';bar.setAttribute('aria-hidden','true');
+  function mount(){(document.body||document.documentElement).appendChild(bar);}
+  if(document.body)mount();else addEventListener('DOMContentLoaded',mount);
+  function upd(){var h=document.documentElement;var max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';}
+  addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd,{passive:true});upd();
+})();
+</script>
 </body>
 </html>
