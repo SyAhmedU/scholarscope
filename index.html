@@ -1287,7 +1287,7 @@ var css=[
 ].join('');
 var s=document.createElement('style');s.id='syed-juice';s.textContent=css;document.head.appendChild(s);
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target.closest&&e.target.closest('button,a,[role=button],input[type=button],input[type=submit],summary,.btn,[class*=btn]');if(!t)return;var b=document.createElement('span');b.className='syed-burst';b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.color=getComputedStyle(t).color;document.body.appendChild(b);setTimeout(function(){b.remove()},520);},{passive:true});
+addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target.closest&&e.target.closest('button,a,[role=button],input[type=button],input[type=submit],summary,.btn,[class*=btn]');if(!t)return;if(/close|dismiss|delete|remove|cancel|danger/i.test((t.getAttribute&&t.getAttribute('aria-label')||'')+' '+(typeof t.className==='string'?t.className:''))||/^[×✕✖]$/.test((t.textContent||'').trim()))return;var b=document.createElement('span');b.className='syed-burst';b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.color=getComputedStyle(t).color;document.body.appendChild(b);setTimeout(function(){b.remove()},520);},{passive:true});
 })();
 </script>
 
