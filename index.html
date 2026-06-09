@@ -6,6 +6,32 @@
 <title>ScholarScope — Who leads & where to publish in social science & management</title>
 <meta name="description" content="A live directory of the institutions, journals, and authors that lead social science & management research — every record a real OpenAlex entity — plus a Publish desk that matches your paper to journals by turnaround, quartile and fit." />
 <meta name="theme-color" content="#FBF7EF" />
+<link rel="canonical" href="https://syahmedu.github.io/scholarscope/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="ScholarScope — Who leads &amp; where to publish in social science &amp; management" />
+<meta property="og:description" content="A live OpenAlex directory of the institutions, journals, and authors leading social science &amp; management research — plus a Publish desk that matches your paper to journals by turnaround, quartile and fit." />
+<meta property="og:url" content="https://syahmedu.github.io/scholarscope/" />
+<meta property="og:site_name" content="Syed Asrar" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="ScholarScope — Who leads &amp; where to publish" />
+<meta name="twitter:description" content="A live OpenAlex directory of leading institutions, journals &amp; authors in social science &amp; management, plus a journal-matching Publish desk." />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="author" content="Syed Ahmed" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "ScholarScope",
+  "url": "https://syahmedu.github.io/scholarscope/",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web browser",
+  "description": "A live OpenAlex directory of the institutions, journals, and authors leading social science and management research, plus a Publish desk that matches papers to journals by turnaround, quartile and fit.",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "author": { "@type": "Person", "name": "Syed Ahmed", "url": "https://syahmedu.github.io/nexus/" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='url(%23g)'/><text x='50%25' y='57%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='900' font-size='16' fill='white'>S</text><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23FF9656'/><stop offset='52%25' stop-color='%23F14575'/><stop offset='100%25' stop-color='%239270F4'/></linearGradient></defs></svg>" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +75,8 @@ html[data-theme="dark"] body::before{mix-blend-mode:screen;opacity:.05;}
 a{color:inherit;text-decoration:none;}
 ::selection{background:var(--magenta);color:#fff;}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--violet);outline-offset:2px;border-radius:6px;}
+.skip-link{position:fixed;top:10px;left:10px;z-index:100000;transform:translateY(-160%);transition:transform .2s ease;background:#211B2E;color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;text-decoration:none;}
+.skip-link:focus{transform:translateY(0);outline:3px solid var(--violet);outline-offset:2px;}
 .mono{font-family:'IBM Plex Mono',monospace;}
 .wrap{max-width:1080px;margin:0 auto;padding:0 22px;position:relative;z-index:2;}
 
@@ -269,6 +297,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <div class="bar">
   <div class="s-mark">S</div>
@@ -281,7 +310,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button>
 </div>
 
-<main class="wrap">
+<main class="wrap" id="main" tabindex="-1">
   <section class="hero">
     <div class="kicker">Institutions · Authors · Journals · Where to publish</div>
     <h1>Who leads — and where to publish in — <span class="hl">social science &amp; management</span>?</h1>
