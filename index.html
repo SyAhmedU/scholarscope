@@ -1275,19 +1275,14 @@ window.addEventListener('scroll', hidePubTip, { passive:true });
 /* ── Boot ── */
 runLeaders();
 </script>
-<script>/* syed-juice: game-grade interaction polish (additive, no colour/design change, reduced-motion aware) */
+<script>/* syed-juice: subtle, professional interaction polish (additive, no colour/design change, reduced-motion aware; no particle/burst or cursor-magnet effects) */
 (function(){if(typeof document==='undefined'||document.getElementById('syed-juice'))return;
 var css=[
 '@media (prefers-reduced-motion: no-preference){',
-'button,[role=button],.btn,[class*=btn],input[type=submit],input[type=button],select,summary{transition:transform .16s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease,border-color .18s ease,background-color .18s ease,color .18s ease}',
-'button:active,[role=button]:active,.btn:active,[class*=btn]:active,input[type=submit]:active,select:active,summary:active{transform:translateY(1px) scale(.96);transition-duration:.06s}}',
-'.syed-burst{position:fixed;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;pointer-events:none;z-index:99999;background:radial-gradient(circle,currentColor 0%,transparent 70%);transform:scale(0);opacity:.5;animation:syed-burst .5s cubic-bezier(.22,1,.36,1) forwards}',
-'@keyframes syed-burst{to{transform:scale(3.4);opacity:0}}',
-'@media (prefers-reduced-motion:reduce){.syed-burst{display:none}}'
+'button,[role=button],.btn,[class*=btn],input[type=submit],input[type=button],select,summary{transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .2s ease,border-color .18s ease,background-color .18s ease,color .18s ease}',
+'button:active,[role=button]:active,.btn:active,[class*=btn]:active,input[type=submit]:active,select:active,summary:active{transform:translateY(1px) scale(.985);transition-duration:.06s}}'
 ].join('');
 var s=document.createElement('style');s.id='syed-juice';s.textContent=css;document.head.appendChild(s);
-if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target.closest&&e.target.closest('button,a,[role=button],input[type=button],input[type=submit],summary,.btn,[class*=btn]');if(!t)return;if(/close|dismiss|delete|remove|cancel|danger/i.test((t.getAttribute&&t.getAttribute('aria-label')||'')+' '+(typeof t.className==='string'?t.className:''))||/^[×✕✖]$/.test((t.textContent||'').trim()))return;var b=document.createElement('span');b.className='syed-burst';b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.color=getComputedStyle(t).color;document.body.appendChild(b);setTimeout(function(){b.remove()},520);},{passive:true});
 })();
 </script>
 
@@ -1307,29 +1302,6 @@ addEventListener('pointerdown',function(e){if(e.button!==0)return;var t=e.target
 })();
 </script>
 
-<!-- syed-magnet: magnetic pull on primary CTAs (desktop hover, reduced-motion aware; no-ops if nothing matches) -->
-<script>
-(function(){
-  if(document.getElementById('syed-magnet-flag'))return;
-  var f=document.createElement('meta');f.id='syed-magnet-flag';(document.head||document.documentElement).appendChild(f);
-  if(!window.matchMedia)return;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  if(!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
-  var SEL='.btn-fill,.hero-btn,.btn-gold,.lnk.lp,.syed-link-all,.cta,.ic-add,[data-magnetic]';
-  function bind(el){
-    if(el.__mag)return;el.__mag=1;
-    el.addEventListener('pointermove',function(e){
-      var r=el.getBoundingClientRect();
-      var x=Math.max(-9,Math.min(9,(e.clientX-(r.left+r.width/2))*0.3));
-      var y=Math.max(-9,Math.min(9,(e.clientY-(r.top+r.height/2))*0.4));
-      el.style.transform='translate('+x+'px,'+y+'px)';
-    });
-    el.addEventListener('pointerleave',function(){el.style.transform='';});
-  }
-  function scan(){document.querySelectorAll(SEL).forEach(bind);}
-  if(document.readyState!=='loading')scan();else addEventListener('DOMContentLoaded',scan);
-  setTimeout(scan,1500);
-})();
-</script>
+<!-- (magnetic cursor-pull effect removed for a professional, calm feel) -->
 </body>
 </html>
