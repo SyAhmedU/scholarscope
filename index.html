@@ -145,6 +145,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:13px 16px;cursor:pointer;transition:.15s;font-family:inherit;color:var(--ink);}
 .item:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm),0 12px 30px -18px rgba(146,112,244,.35);}
 .rank{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.9rem;color:var(--ink-faint);min-width:26px;}
+/* the podium — top three ranks wear the gradient in Fraunces */
+.item:nth-child(-n+3) .rank{
+  font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:1.35rem;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
 .item-main{flex:1;min-width:0;}
 .item-title{font-weight:700;font-size:.98rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-meta{font-size:.78rem;color:var(--ink-soft);}
