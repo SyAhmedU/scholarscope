@@ -62,6 +62,9 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+/* clip, not hidden — keeps sticky working; stops any transient wide element
+   from locking the mobile layout viewport open at first paint */
+html,body{overflow-x:clip;}
 body{
   font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--ink);
   background:
@@ -151,7 +154,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
 }
 .item-main{flex:1;min-width:0;}
-.item-title{font-weight:700;font-size:.98rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* display:block — ellipsis is inert on inline spans, and one long journal
+   name in nowrap would prop the mobile layout viewport open (410px lock) */
+.item-title{display:block;font-weight:700;font-size:.98rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-meta{font-size:.78rem;color:var(--ink-soft);}
 .item-stat{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--magenta);font-weight:600;white-space:nowrap;}
 .skeleton{height:62px;border-radius:14px;background:linear-gradient(90deg,var(--paper-3),var(--paper-2),var(--paper-3));background-size:200% 100%;animation:sh 1.3s linear infinite;}
