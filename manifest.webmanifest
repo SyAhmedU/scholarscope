@@ -1,0 +1,18 @@
+{
+  "name": "ScholarScope",
+  "short_name": "ScholarScope",
+  "description": "Leading institutions, journals & authors in social science + a publish desk.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#FBF7EF",
+  "theme_color": "#FBF7EF",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

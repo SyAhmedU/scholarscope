@@ -310,6 +310,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .pub-est-note{font-size:.76rem;color:var(--ink-faint);margin:14px 0 2px;}
 @media(max-width:680px){.pub-dash{grid-template-columns:1fr;}}
 </style>
+<!-- SYED-PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ScholarScope">
+<!-- /SYED-PWA -->
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -1412,5 +1420,8 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
 })();
 </script>
 <!-- /SYED-AMBIENT -->
+<!-- SYED-PWA-SW -->
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+<!-- /SYED-PWA-SW -->
 </body>
 </html>
