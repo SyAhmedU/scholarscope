@@ -329,7 +329,7 @@ function mk(){
  ov.style.cssText="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 18%,#221c16 0%,#181410 60%,#120e0a 100%);color:#e9ddc9;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;padding:24px";
  var box=document.createElement("div");box.style.cssText="width:min(380px,86vw);text-align:center";
  box.innerHTML="<div style='font-size:11.5px;letter-spacing:.4em;text-transform:uppercase;color:#7d6f5b;margin-bottom:24px'>private</div><div style='font:italic 400 30px/1.2 Georgia,serif;margin-bottom:30px'>Enter to continue</div><input id='syed-gate-i' inputmode='numeric' autocomplete='off' autocapitalize='off' spellcheck='false' aria-label='password' placeholder='········' maxlength='24' style='width:100%;background:transparent;border:0;border-bottom:1px solid #3a3128;color:#e9ddc9;font:400 24px/1 Georgia,serif;text-align:center;letter-spacing:.4em;padding:8px 0 10px;outline:none;caret-color:#bb6a57'/><div id='syed-gate-h' style='margin-top:18px;font-size:12px;letter-spacing:.12em;color:#7d6f5b;height:16px'>enter to open</div>";
- (document.body||document.documentElement).appendChild(ov);
+ ov.appendChild(box);(document.body||document.documentElement).appendChild(ov);
  var html=document.documentElement,prev=html.style.overflow;html.style.overflow="hidden";
  var inp=box.querySelector("#syed-gate-i"),hint=box.querySelector("#syed-gate-h");
  function ok(){html.style.overflow=prev;if(ov.parentNode)ov.parentNode.removeChild(ov);}
