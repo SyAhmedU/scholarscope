@@ -391,6 +391,7 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
           <div class="menu" id="fieldMenu" style="display:none"></div>
         </div>
       </div>
+      <div id="lensCov" style="margin-top:10px"></div>
     </div>
 
     <!-- Search: entity typeahead -->
@@ -508,6 +509,7 @@ $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button');
   else if(isMap){ runMap(); }
   else if(isPub){ initPublish(); }
   else { $('#results').innerHTML=''; }
+  if(typeof renderPubTray==='function') renderPubTray(); // shortlist tray only lives on the Publish desk
 });
 $('#kindSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   state.kind=b.dataset.kind;
@@ -526,6 +528,24 @@ function renderChips(){
   chipsEl.innerHTML = LENS.map(c=>`<button class="chip${c.id===state.field.id?' on':''}" data-field="${c.id}">${esc(c.name)}</button>`).join('');
 }
 renderChips();
+
+/* ── Lens coverage: how much of OpenAlex each L0 concept spans (real counts,
+   one batched call, fetched once) ── */
+(async function renderLensCoverage(){
+  const el=$('#lensCov'); if(!el) return;
+  try{
+    const d = await getJSON(`${OA}/concepts?filter=ids.openalex:${LENS.map(c=>c.id).join('|')}&per_page=${LENS.length}&select=id,display_name,works_count`);
+    const rows=(d.results||[]).map(r=>({name:r.display_name, n:r.works_count||0})).sort((a,b)=>b.n-a.n);
+    if(!rows.length) return;
+    const max=rows[0].n;
+    el.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px">Lens coverage · OpenAlex works per field (live)</div>`+
+      rows.map(r=>`<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.74rem">
+        <span style="width:104px;color:var(--ink-soft)">${esc(r.name)}</span>
+        <span style="flex:1;max-width:260px;height:6px;border-radius:4px;background:var(--paper-3);overflow:hidden"><span style="display:block;height:100%;width:${Math.max(2,r.n/max*100).toFixed(1)}%;background:var(--grad)"></span></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--ink-faint)">${num(r.n)}</span>
+      </div>`).join('');
+  }catch(e){ /* coverage strip is decorative — fail silent */ }
+})();
 chipsEl.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
   const c = LENS.find(x=>x.id===b.dataset.field); if(c){ state.field=c; state.drillA2=null; renderChips(); refreshField(); }
 });
@@ -611,15 +631,47 @@ function renderLeaderRows(){
     <button class="item" data-id="${esc(g.id)}">
       <span class="rank">${i+1}</span>
       <span class="item-main"><span class="item-title">${esc(g.name)}</span></span>
-      <span class="item-stat">${num(g.count)} ${statLabel}</span>
+      <span class="item-stat"><span class="lead-trend" data-trend="${esc(g.id)}"></span> ${num(g.count)} ${statLabel}</span>
     </button>`).join('');
   $('#results').querySelectorAll('.item').forEach(el => el.onclick = () => openProfile(kind, el.dataset.id));
   const remaining = rows.length - shown;
   $('#leadMore').innerHTML =
-    `<div class="lead-count">Showing ${num(view.length)} of ${num(rows.length)}</div>` +
+    `<div class="lead-count">Showing ${num(view.length)} of ${num(rows.length)} · ▲▼ = works trend, last two complete years (OpenAlex)</div>` +
     (remaining > 0 ? `<button class="more-btn" id="moreBtn">Load ${num(Math.min(LEAD_PAGE, remaining))} more ↓</button>` : '');
   const mb = $('#moreBtn');
   if(mb) mb.onclick = () => { leadState.shown = Math.min(rows.length, shown + LEAD_PAGE); renderLeaderRows(); };
+  injectLeaderTrends(view, kind);
+}
+
+/* YoY works-trend arrows for the visible leaderboard rows — one batched
+   OpenAlex call per 25 ids (filter=ids.openalex:A|B|…), cached per entity. */
+leadState.trends = {};
+let trendSeq = 0;
+async function injectLeaderTrends(view, kind){
+  const seq = ++trendSeq;
+  const ep = kind==='authors' ? 'authors' : kind==='journals' ? 'sources' : 'institutions';
+  const missing = view.map(g=>g.id).filter(id => !(id in leadState.trends));
+  for(let i=0; i<missing.length; i+=25){
+    const batch = missing.slice(i, i+25);
+    try{
+      const d = await getJSON(`${OA}/${ep}?filter=ids.openalex:${batch.join('|')}&per_page=${batch.length}&select=id,counts_by_year`);
+      for(const r of (d.results||[])){
+        const t = yoyTrend(r.counts_by_year);
+        leadState.trends[shortId(r.id)] = t ? t.works : null;
+      }
+      for(const id of batch) if(!(id in leadState.trends)) leadState.trends[id] = null;
+    }catch(e){ for(const id of batch) leadState.trends[id] = null; }
+    if(seq !== trendSeq) return; // view changed underneath us
+    for(const id of batch){
+      const el = document.querySelector(`.lead-trend[data-trend="${id}"]`);
+      if(el) el.innerHTML = trendArrow(leadState.trends[id]);
+    }
+  }
+  // already-cached rows render instantly
+  for(const g of view){
+    const el = document.querySelector(`.lead-trend[data-trend="${g.id}"]`);
+    if(el && !el.innerHTML && leadState.trends[g.id]!=null) el.innerHTML = trendArrow(leadState.trends[g.id]);
+  }
 }
 
 async function runLeaders(){
@@ -665,6 +717,46 @@ function workRow(w){
 }
 function statBox(n,k){ return `<div class="stat"><div class="n">${n}</div><div class="k">${k}</div></div>`; }
 
+/* YoY trend from counts_by_year (real OpenAlex records): compare the two most
+   recent COMPLETE years, never the in-progress one. Returns {works,cites} in %
+   or null when there isn't enough history. */
+function yoyTrend(counts){
+  if(!Array.isArray(counts)) return null;
+  const nowY = new Date().getFullYear();
+  const done = counts.filter(c=>c.year<nowY).sort((a,b)=>b.year-a.year);
+  if(done.length<2) return null;
+  const [cur,prev]=done;
+  const pct=(a,b)=> b>0 ? Math.round((a-b)/b*100) : null;
+  return { year:cur.year, works:pct(cur.works_count,prev.works_count), cites:pct(cur.cited_by_count,prev.cited_by_count) };
+}
+function trendArrow(p){
+  if(p==null) return '';
+  const up=p>=0, col=up?'#1b8a5a':'#c0392b';
+  return `<span style="color:${col};font-size:.72rem;font-weight:700;white-space:nowrap">${up?'▲':'▼'} ${Math.abs(p)}%</span>`;
+}
+function trendLine(t){
+  if(!t) return '';
+  return `<div class="note" style="margin-top:6px;color:var(--ink-faint);font-size:.76rem">Trend ${t.year} vs ${t.year-1}: works ${trendArrow(t.works)} · citations ${trendArrow(t.cites)} <span style="opacity:.75">(real OpenAlex year counts)</span></div>`;
+}
+
+/* Works+citations per-year trajectory as a hand-rolled dual-line SVG. */
+function trajectorySVG(counts){
+  if(!Array.isArray(counts)||counts.length<3) return '';
+  const rows=[...counts].sort((a,b)=>a.year-b.year).slice(-12);
+  const W=440,H=120,mL=6,mR=6,mT=10,mB=18,w=W-mL-mR,h=H-mT-mB;
+  const maxW=Math.max(1,...rows.map(r=>r.works_count)), maxC=Math.max(1,...rows.map(r=>r.cited_by_count));
+  const x=i=>mL + (rows.length>1? i/(rows.length-1)*w : w/2);
+  const yW=v=>mT + h - v/maxW*h, yC=v=>mT + h - v/maxC*h;
+  const path=(fn,key)=>rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(1)+','+fn(r[key]).toFixed(1)).join(' ');
+  const labels=rows.map((r,i)=> (i===0||i===rows.length-1||r.year%5===0)?`<text x="${x(i).toFixed(1)}" y="${H-4}" font-size="8.5" text-anchor="middle" fill="var(--ink-faint)">${r.year}</text>`:'').join('');
+  return `<div class="m-sec"><h4>Trajectory <span style="font-weight:400;color:var(--ink-faint)">· works <span style="color:#9270F4">—</span> &amp; citations <span style="color:#F14575">—</span> per year, each on its own scale</span></h4>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="works and citations per year">
+      <path d="${path(yW,'works_count')}" fill="none" stroke="#9270F4" stroke-width="2"/>
+      <path d="${path(yC,'cited_by_count')}" fill="none" stroke="#F14575" stroke-width="2" stroke-dasharray="1 0" opacity=".85"/>
+      ${labels}
+    </svg></div>`;
+}
+
 async function openProfile(kind, id){
   scrim.classList.add('show');
   modal.innerHTML = `<button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button><div style="padding:30px 0;text-align:center;color:var(--ink-faint)"><span class="spin"></span> Loading profile…</div>`;
@@ -678,7 +770,7 @@ async function openProfile(kind, id){
 }
 
 async function institutionProfile(id){
-  const o = await getJSON(`${OA}/institutions/${id}?select=display_name,country_code,geo,type,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  const o = await getJSON(`${OA}/institutions/${id}?select=display_name,country_code,geo,type,homepage_url,works_count,cited_by_count,summary_stats,ids,counts_by_year`);
   cmpNames[id] = o.display_name;
   const [dom, top] = await Promise.all([
     getJSON(`${OA}/works?filter=institutions.id:${id},concepts.id:${LENS_OR}&per_page=1`).then(r=>r.meta&&r.meta.count).catch(()=>null),
@@ -697,17 +789,26 @@ async function institutionProfile(id){
       ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
       ${statBox(dom!=null?num(dom):'—','Soc-sci works')}
     </div>
+    ${trendLine(yoyTrend(o.counts_by_year))}
     ${top.length?`<div class="m-sec"><h4>Top works in social science &amp; management</h4>${top.map(workRow).join('')}</div>`:''}
     <div class="m-links">
       <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
       ${ror?`<a class="m-link" href="${esc(ror)}" target="_blank" rel="noopener">ROR ↗</a>`:''}
       ${o.homepage_url?`<a class="m-link" href="${esc(o.homepage_url)}" target="_blank" rel="noopener">Website ↗</a>`:''}
+      ${o.country_code?`<button class="m-link" id="flyBtn">🗺 See on map</button>`:''}
       <button class="m-link" id="cmp-btn-${id}" onclick="compareToggle('institutions','${id}')">${inCompare(id)?'✓ In compare':'＋ Compare'}</button>
     </div>`;
+  const fly=$('#flyBtn');
+  if(fly) fly.onclick=()=>{
+    closeModal();
+    const mapBtn=document.querySelector('#modeSeg [data-mode="map"]');
+    if(mapBtn) mapBtn.click();
+    drillCountry(String(o.country_code).toUpperCase(), o.display_name.split(',')[0]);
+  };
 }
 
 async function authorProfile(id){
-  const o = await getJSON(`${OA}/authors/${id}?select=display_name,last_known_institutions,affiliations,x_concepts,summary_stats,works_count,cited_by_count,ids`);
+  const o = await getJSON(`${OA}/authors/${id}?select=display_name,last_known_institutions,affiliations,x_concepts,summary_stats,works_count,cited_by_count,ids,counts_by_year`);
   cmpNames[id] = o.display_name;
   const top = await getJSON(`${OA}/works?filter=authorships.author.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
   const aff = (o.last_known_institutions&&o.last_known_institutions.length?o.last_known_institutions:(o.affiliations||[]).map(a=>a.institution).filter(Boolean))
@@ -725,6 +826,8 @@ async function authorProfile(id){
       ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
       ${statBox(o.summary_stats?num(o.summary_stats.i10_index):'—','i10-index')}
     </div>
+    ${trendLine(yoyTrend(o.counts_by_year))}
+    ${trajectorySVG(o.counts_by_year)}
     ${concepts.length?`<div class="m-sec"><h4>Research areas</h4><div class="tags">${concepts.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div></div>`:''}
     ${top.length?`<div class="m-sec"><h4>Most-cited works</h4>${top.map(workRow).join('')}</div>`:''}
     <div class="m-links">
@@ -735,20 +838,23 @@ async function authorProfile(id){
 }
 
 async function journalProfile(id){
-  const o = await getJSON(`${OA}/sources/${id}?select=display_name,host_organization_name,issn_l,is_oa,homepage_url,works_count,cited_by_count,summary_stats,ids`);
+  const o = await getJSON(`${OA}/sources/${id}?select=display_name,host_organization_name,issn_l,is_oa,is_in_doaj,apc_usd,homepage_url,works_count,cited_by_count,summary_stats,ids,counts_by_year`);
   cmpNames[id] = o.display_name;
   const top = await getJSON(`${OA}/works?filter=primary_location.source.id:${id}&sort=cited_by_count:desc&per_page=6&select=title,publication_year,cited_by_count,doi`).then(r=>r.results||[]).catch(()=>[]);
+  const oaBits=[o.is_oa?'Open access':null, o.is_in_doaj?'DOAJ-listed':null, (o.apc_usd!=null&&o.apc_usd>0)?('APC $'+num(o.apc_usd)):null].filter(Boolean);
   modal.innerHTML = `
     <button class="modal-x" onclick="document.getElementById('scrim').classList.remove('show')">×</button>
     <div class="m-kind">Journal · Source</div>
     <div class="m-title">${esc(o.display_name)}</div>
-    <div class="m-meta">${esc([o.host_organization_name, o.issn_l&&('ISSN '+o.issn_l), o.is_oa?'Open access':null].filter(Boolean).join(' · '))||'&nbsp;'}</div>
+    <div class="m-meta">${esc([o.host_organization_name, o.issn_l&&('ISSN '+o.issn_l)].filter(Boolean).join(' · '))||'&nbsp;'}</div>
     <div class="stats">
       ${statBox(num(o.works_count),'Works')}
       ${statBox(num(o.cited_by_count),'Citations')}
       ${statBox(o.summary_stats?num(o.summary_stats.h_index):'—','h-index')}
       ${statBox(o.summary_stats&&o.summary_stats['2yr_mean_citedness']!=null?o.summary_stats['2yr_mean_citedness'].toFixed(1):'—','2yr impact')}
     </div>
+    ${oaBits.length?`<div class="m-sec"><h4>Access &amp; cost <span style="font-weight:400;color:var(--ink-faint)">· as recorded by OpenAlex</span></h4><div class="tags">${oaBits.map(b=>`<span class="tag">${esc(b)}</span>`).join('')}</div></div>`:''}
+    ${trendLine(yoyTrend(o.counts_by_year))}
     ${top.length?`<div class="m-sec"><h4>Most-cited articles</h4>${top.map(workRow).join('')}</div>`:''}
     <div class="m-links">
       <a class="m-link grad" href="https://openalex.org/${id}" target="_blank" rel="noopener">OpenAlex ↗</a>
@@ -1001,8 +1107,10 @@ const PUB = {
   meta: window.__JOURNAL_META__ || {},
   ready: false,
   shortlist: new Set((()=>{ try{return JSON.parse(localStorage.getItem('ss_shortlist')||'[]');}catch(e){return [];} })()),
-  f: { field:'', quartiles:null, oaOnly:false, maxSpeed:120, search:'', sort:'first_decision_asc' },
+  f: { field:'', quartiles:null, oaOnly:false, maxSpeed:120, search:'', sort:'first_decision_asc',
+       sources: new Set((()=>{ try{return JSON.parse(localStorage.getItem('ss_src')||'null')||['publisher','community','estimated'];}catch(e){return ['publisher','community','estimated'];} })()) },
 };
+const SRC_RANK = { publisher:0, community:1, estimated:2 }; // trust-first tie-break: stated before estimated
 const FCOLORS = {
   "Multidisciplinary":"#7c3aed","Medicine":"#dc2626","Biology":"#16a34a","Economics":"#0369a1",
   "Psychology":"#db2777","Environmental Science":"#059669","Physics & Chemistry":"#9333ea",
@@ -1067,6 +1175,11 @@ function initPublish(){
         <label class="pub-toggle"><input type="checkbox" id="pbOA"> Open access only</label>
       </div>
       <div class="row2">
+        <span class="lbl" title="Where the turnaround figure comes from — stated data sorts first at equal speed">Data source</span>
+        <div class="chips" id="pbSrc">${['publisher','community','estimated'].map(s=>`<button class="chip${PUB.f.sources.has(s)?' on':''}" data-src="${s}">${srcLabel(s)}</button>`).join('')}</div>
+        <span class="pub-count" style="font-size:.7rem">estimated = badged guess, never a measurement</span>
+      </div>
+      <div class="row2">
         <span class="lbl">Max first decision</span>
         <input class="pub-slider" id="pbSpeed" type="range" min="7" max="120" value="120" style="flex:1;max-width:240px">
         <span class="pub-count" id="pbSpeedVal">Any</span>
@@ -1096,7 +1209,7 @@ function initPublish(){
     <div class="pub-sub">Turnaround patterns across the dataset.</div>
     <div class="pub-dash">
       <div class="pub-card"><h4>Avg first decision by field</h4><svg id="pubBar"></svg></div>
-      <div class="pub-card"><h4>Impact factor vs wait <span class="hint">bubble = acceptance rate</span></h4><svg id="pubScatter"></svg></div>
+      <div class="pub-card"><h4>Quartile × first decision <span class="hint">● stated · ◆ estimated · ★ your shortlist</span></h4><svg id="pubScatter"></svg></div>
       <div class="pub-card wide"><h4>Fastest publishers <span class="hint">≥3 journals tracked</span></h4><div id="pubRank"></div></div>
     </div>`;
 
@@ -1112,15 +1225,27 @@ function initPublish(){
       if(oa==='sub' && j.open_access) return false;
       if(j.first_decision>maxd) return false;
       return true;
-    }).sort((a,b)=>a.first_decision-b.first_decision).slice(0,6);
+    }).sort((a,b)=>a.first_decision-b.first_decision || (SRC_RANK[a.source]??9)-(SRC_RANK[b.source]??9)).slice(0,6);
     const c=$('#pfCards');
     if(!res.length){ c.innerHTML='<div class="note" style="color:var(--ink-faint)">No matches — try relaxing your criteria.</div>'; return; }
+    // "why this matched" chips: each chip restates a criterion the journal actually met
+    const whyChips = j => {
+      const chips=[];
+      if(field) chips.push('field: '+j.field);
+      if(q) chips.push(j.quartile+' ✓');
+      if(oa==='oa') chips.push('open access ✓');
+      if(oa==='sub') chips.push('subscription ✓');
+      if(maxd<9999) chips.push('≤'+maxd+'d wait ✓');
+      chips.push(srcLabel(j.source)+' data');
+      return chips.map(t=>`<span class="tag" style="font-size:.64rem;padding:2px 8px">${esc(t)}</span>`).join('');
+    };
     c.innerHTML = res.map((j,i)=>`
       <button class="pf-card" data-id="${j.id}">
         <div class="pf-rank">#${i+1} · ${speedLabel(j.first_decision)}</div>
         <div class="pf-name">${esc(j.name)}</div>
         <div class="pf-line">First decision <b style="color:${speedColor(j.first_decision)}">${j.first_decision}d</b> · acceptance ${j.time_to_acceptance}d</div>
         <div class="pf-line dim">${j.quartile} · IF ${j.impact_factor} · ${j.acceptance_rate}% accept${j.open_access?' · OA':''}</div>
+        <div class="pf-line" style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${whyChips(j)}</div>
       </button>`).join('');
     c.querySelectorAll('.pf-card').forEach(el=>el.onclick=()=>openJournalDetail(PUB.data.find(x=>x.id===+el.dataset.id)));
   };
@@ -1132,6 +1257,11 @@ function initPublish(){
     const q=b.dataset.q; if(PUB.f.quartiles.has(q)) PUB.f.quartiles.delete(q); else PUB.f.quartiles.add(q);
     b.classList.toggle('on', PUB.f.quartiles.has(q)); renderPubTable(); });
   $('#pbOA').addEventListener('change', e=>{ PUB.f.oaOnly=e.target.checked; renderPubTable(); });
+  $('#pbSrc').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return;
+    const s=b.dataset.src; if(PUB.f.sources.has(s)) PUB.f.sources.delete(s); else PUB.f.sources.add(s);
+    b.classList.toggle('on', PUB.f.sources.has(s));
+    try{ localStorage.setItem('ss_src', JSON.stringify([...PUB.f.sources])); }catch(err){}
+    renderPubTable(); });
   $('#pbSpeed').addEventListener('input', e=>{ const v=+e.target.value; PUB.f.maxSpeed=v; $('#pbSpeedVal').textContent = v>=120?'Any':('≤'+v+'d'); renderPubTable(); });
   $('#pbSort').addEventListener('change', e=>{ PUB.f.sort=e.target.value; renderPubTable(); });
   $('#publishArea').querySelectorAll('.pub-table thead th[data-col]').forEach(th=>{
@@ -1152,6 +1282,7 @@ function pubFiltered(){
     if(f.field && j.field!==f.field) return false;
     if(f.quartiles && !f.quartiles.has(j.quartile)) return false;
     if(f.oaOnly && !j.open_access) return false;
+    if(f.sources && !f.sources.has(j.source)) return false;
     if(f.maxSpeed<120 && j.first_decision>f.maxSpeed) return false;
     if(f.search && !j.name.toLowerCase().includes(f.search) && !j.publisher.toLowerCase().includes(f.search)) return false;
     return true;
@@ -1160,8 +1291,9 @@ function pubFiltered(){
 function pubSorted(arr){
   const m=PUB.f.sort.match(/^(.*)_(asc|desc)$/); const col=m[1], dir=m[2];
   return [...arr].sort((a,b)=>{ const va=a[col], vb=b[col];
-    if(typeof va==='string') return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
-    return dir==='asc'?va-vb:vb-va; });
+    if(typeof va==='string'){ const c = dir==='asc'?va.localeCompare(vb):vb.localeCompare(va); return c || (SRC_RANK[a.source]??9)-(SRC_RANK[b.source]??9); }
+    // ties break trust-first: publisher-stated before community before estimated
+    return (dir==='asc'?va-vb:vb-va) || (SRC_RANK[a.source]??9)-(SRC_RANK[b.source]??9); });
 }
 function renderPubTable(){
   const rows = pubSorted(pubFiltered());
@@ -1194,11 +1326,30 @@ function togglePubStar(id){
   if(PUB.shortlist.has(id)) PUB.shortlist.delete(id); else PUB.shortlist.add(id);
   try{ localStorage.setItem('ss_shortlist', JSON.stringify([...PUB.shortlist])); }catch(e){}
   renderPubTable(); updatePubCmp();
+  if(window.d3 && $('#pubScatter')) drawPubScatter(); // keep the shortlist pins in sync
 }
 function updatePubCmp(){
   const b=$('#pbCmp'); if(!b) return;
   if(PUB.shortlist.size>=2){ b.style.display=''; b.textContent=`Compare ${PUB.shortlist.size} →`; }
   else b.style.display='none';
+  renderPubTray();
+}
+
+/* Sticky shortlist tray — the starred journals follow you down the page
+   (same fixed-bottom pattern as the entity compare tray). */
+function renderPubTray(){
+  let tray=$('#pubTray');
+  const items=[...PUB.shortlist].map(id=>PUB.data.find(j=>j.id===id)).filter(Boolean);
+  if(!items.length || state.mode!=='publish'){ if(tray) tray.remove(); return; }
+  if(!tray){ tray=document.createElement('div'); tray.className='cmp-tray'; tray.id='pubTray'; document.body.appendChild(tray); }
+  tray.innerHTML = `<span class="cmp-tray-label">Shortlist</span>` +
+    items.slice(0,6).map(j=>`<span class="cmp-chip" title="${esc(j.name)}">${esc(j.name.length>26?j.name.slice(0,24)+'…':j.name)}<button data-unstar="${j.id}" aria-label="Remove">×</button></span>`).join('') +
+    (items.length>6?`<span class="cmp-tray-label">+${items.length-6} more</span>`:'') +
+    (items.length>=2?`<button class="cmp-go" id="pubTrayCmp">Compare →</button>`:'') +
+    `<button class="cmp-clear" id="pubTrayClear">Clear</button>`;
+  tray.querySelectorAll('[data-unstar]').forEach(b=>b.onclick=()=>togglePubStar(+b.dataset.unstar));
+  const go=$('#pubTrayCmp'); if(go) go.onclick=openPubCompare;
+  $('#pubTrayClear').onclick=()=>{ PUB.shortlist.clear(); try{localStorage.setItem('ss_shortlist','[]');}catch(e){} renderPubTable(); updatePubCmp(); };
 }
 
 // Curated journal detail (reuses the profile modal) + cross-link to live OpenAlex.
@@ -1223,6 +1374,7 @@ function openJournalDetail(j){
     ${m.gap_areas&&m.gap_areas.length?`<div class="m-sec"><h4>Under-served areas</h4><div class="tags">${m.gap_areas.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>`:''}
     <div class="m-links">
       <button class="m-link grad" id="jd-live" data-name="${esc(j.name)}">Live metrics ↗</button>
+      <a class="m-link" href="https://syahmedu.github.io/journaltime/?topic=${encodeURIComponent(j.name)}" target="_blank" rel="noopener" title="Open JournalTime's Journal Studio with this journal as your target">✍ Write for it · JournalTime ↗</a>
       <button class="m-link" onclick="togglePubStar(${j.id});this.textContent=window.SS_inShort(${j.id})?'✓ Shortlisted':'＋ Compare'">${PUB.shortlist.has(j.id)?'✓ Shortlisted':'＋ Compare'}</button>
     </div>
     <div class="note" style="margin-top:10px;color:var(--ink-faint);font-size:.76rem">Turnaround &amp; acceptance figures are <b>${srcLabel(j.source).toLowerCase()}</b>-sourced${j.source==='estimated'?' (an estimate, not a measured value)':''}. "Live metrics" pulls this journal's real citation record from OpenAlex.</div>`;
@@ -1265,7 +1417,8 @@ function openPubCompare(){
       <thead><tr><th></th>${items.map(j=>`<th>${esc(j.name)}<div class="cmp-kind">${esc(j.publisher.split('/')[0].trim())}</div></th>`).join('')}</tr></thead>
       <tbody>${rows.map(([label,f,dir,fmt],ri)=>`<tr><th>${label}</th>${items.map(j=>{ const v=f(j); const isBest=dir&&v===best[ri]; return `<td class="${isBest?'cmp-best':''}">${fmt(v)}</td>`; }).join('')}</tr>`).join('')}</tbody>
     </table></div>
-    <div class="note" style="margin-top:8px">Best value in each comparable row highlighted. Turnaround figures carry their own source badge — see each journal's detail.</div>`;
+    <div class="m-links" style="margin-top:12px">${items.map(j=>`<a class="m-link" href="https://syahmedu.github.io/journaltime/?topic=${encodeURIComponent(j.name)}" target="_blank" rel="noopener">✍ ${esc(j.name.length>24?j.name.slice(0,22)+'…':j.name)} ↗</a>`).join('')}</div>
+    <div class="note" style="margin-top:8px">Best value in each comparable row highlighted. Turnaround figures carry their own source badge — see each journal's detail. ✍ links open JournalTime's Journal Studio for that journal.</div>`;
 }
 
 // ── Analytics ──
@@ -1283,21 +1436,43 @@ function drawPubBar(){
   g.selectAll('.l').data(fa).join('text').attr('x',-6).attr('y',d=>y(d.f)+y.bandwidth()/2+3.5).attr('text-anchor','end').attr('font-size','9.5px').attr('fill','var(--ink-soft)').text(d=>d.f.length>20?d.f.slice(0,19)+'…':d.f);
 }
 function drawPubScatter(){
+  // Quartile bands (Q1 top → Q4) × first-decision days. Shape encodes the data
+  // source (circle = publisher/community-stated, diamond = estimated — never
+  // passed off as measured); shortlisted journals get a star and stay labelled.
   const d3=window.d3, el=$('#pubScatter'); const W=(el.parentElement.clientWidth||420)-32, H=210;
-  const m={t:8,r:14,b:30,l:40}, w=W-m.l-m.r, h=H-m.t-m.b;
+  const m={t:8,r:14,b:30,l:36}, w=W-m.l-m.r, h=H-m.t-m.b;
   const svg=d3.select(el).attr('width',W).attr('height',H); svg.selectAll('*').remove();
   const g=svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
-  const pts=PUB.data.filter(d=>d.impact_factor>0&&d.impact_factor<100);
-  const x=d3.scaleLinear().domain([0,d3.max(pts,d=>d.impact_factor)*1.05]).range([0,w]);
-  const y=d3.scaleLinear().domain([0,d3.max(pts,d=>d.time_to_acceptance)*1.05]).range([h,0]);
-  const r=d3.scaleSqrt().domain([0,d3.max(pts,d=>d.acceptance_rate)]).range([1.5,7]);
+  const pts=PUB.data.filter(d=>d.first_decision>0&&d.quartile);
+  const quarts=[...new Set(pts.map(d=>d.quartile))].sort();
+  const x=d3.scaleLinear().domain([0,d3.max(pts,d=>d.first_decision)*1.05]).range([0,w]);
+  const y=d3.scaleBand().domain(quarts).range([0,h]).padding(.28);
+  // deterministic jitter inside each band so 1,900+ points don't collapse to a line
+  const jit=d=>((d.id*2654435761)%1000)/1000; // hash of the stable id, not Math.random (keeps renders identical)
+  const yPos=d=>y(d.quartile)+y.bandwidth()*jit(d);
   const axStyle=ax=>{ax.selectAll('text').attr('font-size','8.5px').attr('fill','var(--ink-faint)');ax.select('.domain').attr('stroke','var(--line)');ax.selectAll('.tick line').attr('stroke','var(--line)');};
-  g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).ticks(5).tickSize(3)).call(axStyle);
-  g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(3)).call(axStyle);
-  g.append('text').attr('x',w/2).attr('y',h+26).attr('text-anchor','middle').attr('font-size','8.5px').attr('fill','var(--ink-faint)').text('Impact factor');
-  g.append('text').attr('transform','rotate(-90)').attr('x',-h/2).attr('y',-30).attr('text-anchor','middle').attr('font-size','8.5px').attr('fill','var(--ink-faint)').text('Days to acceptance');
-  g.selectAll('circle').data(pts).join('circle').attr('cx',d=>x(d.impact_factor)).attr('cy',d=>y(d.time_to_acceptance)).attr('r',d=>r(d.acceptance_rate)).attr('fill',d=>fcolor(d.field)).attr('opacity',.6).attr('stroke','var(--paper-2)').attr('stroke-width',.5)
-    .on('mousemove',(e,d)=>showPubTip(e,`<b>${esc(d.name)}</b><br>${esc(d.field)}<br>IF ${d.impact_factor} · ${d.time_to_acceptance}d · ${d.acceptance_rate}% accept`)).on('mouseleave',hidePubTip);
+  g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).ticks(6).tickSize(3)).call(axStyle);
+  g.append('g').call(d3.axisLeft(y).tickSize(0)).call(axStyle);
+  g.append('text').attr('x',w/2).attr('y',h+26).attr('text-anchor','middle').attr('font-size','8.5px').attr('fill','var(--ink-faint)').text('First decision (days)');
+  const stated=pts.filter(d=>d.source!=='estimated'), est=pts.filter(d=>d.source==='estimated');
+  const tip=d=>`<b>${esc(d.name)}</b><br>${d.quartile} · first decision ${d.first_decision}d<br>${srcLabel(d.source)} data · ${esc(d.field)}`;
+  g.selectAll('.pt-c').data(stated).join('circle').attr('class','pt-c')
+    .attr('cx',d=>x(d.first_decision)).attr('cy',yPos).attr('r',3)
+    .attr('fill',d=>fcolor(d.field)).attr('opacity',.55).attr('stroke','var(--paper-2)').attr('stroke-width',.5)
+    .on('mousemove',(e,d)=>showPubTip(e,tip(d))).on('mouseleave',hidePubTip);
+  g.selectAll('.pt-e').data(est).join('rect').attr('class','pt-e')
+    .attr('x',d=>x(d.first_decision)-2.6).attr('y',d=>yPos(d)-2.6).attr('width',5.2).attr('height',5.2)
+    .attr('transform',d=>`rotate(45 ${x(d.first_decision)} ${yPos(d)})`)
+    .attr('fill',d=>fcolor(d.field)).attr('opacity',.4).attr('stroke','var(--paper-2)').attr('stroke-width',.5)
+    .on('mousemove',(e,d)=>showPubTip(e,tip(d))).on('mouseleave',hidePubTip);
+  const pinned=pts.filter(d=>PUB.shortlist.has(d.id));
+  const pinG=g.selectAll('.pt-p').data(pinned).join('g').attr('class','pt-p');
+  pinG.append('text').attr('x',d=>x(d.first_decision)).attr('y',d=>yPos(d)+4).attr('text-anchor','middle')
+    .attr('font-size','12px').attr('fill','#F14575').text('★')
+    .on('mousemove',(e,d)=>showPubTip(e,tip(d))).on('mouseleave',hidePubTip);
+  pinG.append('text').attr('x',d=>x(d.first_decision)+7).attr('y',d=>yPos(d)+3)
+    .attr('font-size','8px').attr('fill','var(--ink-soft)')
+    .text(d=>d.name.length>22?d.name.slice(0,20)+'…':d.name);
 }
 function drawPubRank(){
   const pm={}; PUB.data.forEach(j=>{ (pm[j.publisher]=pm[j.publisher]||{s:0,n:0}).s+=j.first_decision; pm[j.publisher].n++; });
