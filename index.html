@@ -1631,6 +1631,7 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
     + ':where(input:not([type=checkbox]):not([type=radio]):not([type=range]),textarea,select):focus-visible{box-shadow:0 0 0 3px rgba(241,69,117,.16)}';
   if (!RM) css += [
     'html{scroll-behavior:smooth}',
+    'body{transition:background-color .35s ease,color .35s ease}',
     '@keyframes sdyn-page{from{opacity:0}to{opacity:1}}',
     '.sdyn-in body{animation:sdyn-page .45s ease-out both}',
     '.sdyn-hide{opacity:0;transform:translateY(16px)}',
