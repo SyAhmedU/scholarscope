@@ -2,6 +2,17 @@
 
 ## Journal Explorer — 2026-10-10
 
+**Integrity audit (2026-10-10):** `scripts/audit-explorer.py` independently replays
+all journal-year and topic-year counts and checks every displayed paper example
+against the saved corpus; it also queries each of the 100 saved Crossref DOIs.
+Results and limitations are published in `explorer/data/integrity-audit.json`.
+The audit caught overlapping-phrase undercounting in 827 journal/topic series
+across 749 journals. Topic lenses now search independently; article totals and
+source-paper metadata were unaffected. No generated research questions are
+represented as publisher statements or established findings. Source-backed
+metadata can still contain provider errors; this is not a claim that every
+underlying paper has been manually reviewed.
+
 `explorer/` is the journal dossier within the existing Publish desk, linked from
 the main header and each journal detail. No new standalone research product.
 
@@ -31,6 +42,7 @@ the main header and each journal detail. No new standalone research product.
 python scripts/build-explorer.py
 python scripts/refresh-explorer.py
 node scripts/verify-explorer.mjs
+python scripts/audit-explorer.py
 python -m http.server 8771 --bind 127.0.0.1
 # In a second terminal; EXPLORER_TEST_URL defaults to port 8768, so set it to 8771:
 python scripts/smoke-explorer.py
@@ -55,10 +67,10 @@ This is buildless; existing GitHub Pages deployment serves `/explorer/`.
 A live directory of the **institutions, schools, journals, and authors** that lead
 **social science & management** research — part of the Research Suite (reference tier).
 
-Single-file app (`index.html`, no build). All data is fetched live from
-[OpenAlex](https://openalex.org) in the browser (anonymous, CORS) — **nothing is
-invented**; every entity and number is a real OpenAlex record, with links out
-(OpenAlex / ROR / ORCID / DOI) to verify.
+Buildless app. The original directory fetches [OpenAlex](https://openalex.org)
+records live in the browser, with source links. Journal Explorer additionally uses
+a dated corpus, derived statistics and Crossref metadata. AI-assisted suggestions
+and planning assumptions are explicitly distinguished from source-backed facts.
 
 ## What it does
 - **🏆 Leaders** — pick a field (Psychology · Sociology · Economics · Political science ·

@@ -41,7 +41,9 @@ TOPICS = {
  'turnover': ('Turnover & retention', r'turnover|employee retention|quit\w*'),
  'power': ('Power & status', r'power|status|hierarch\w*'),
 }
-pattern = re.compile('|'.join(r'(?P<'+k+r'>\b(?:'+v[1]+r')\b)' for k,v in TOPICS.items()), re.I)
+# Search each lens independently: a combined alternation consumes shared phrases
+# (e.g. leader-member exchange) and silently undercounts overlapping lenses.
+patterns = {k:re.compile(r'\b(?:'+v[1]+r')\b',re.I) for k,v in TOPICS.items()}
 registry = read(BOOK/'management-journals.json')
 manifest = read(BOOK/'management/manifest.json')
 journals = {j['scopusSourceId']:j for j in registry['journals'] if j['sourceType']=='journal'}
@@ -78,7 +80,8 @@ def ingest(p):
     s['count']+=1; s['years'][y]+=1; s['doiCount']+=bool(p.get('doi')); s['titleCount']+=bool(p.get('title')); s['identity']['source-id' if by_source.get(p.get('sourceId')) else 'exact-normalized-title']+=1
     if y>=2023:keep(s['recent'],p,12)
     if y<2018:return
-    for t in {m.lastgroup for m in pattern.finditer(p.get('title') or '')}:
+    for t,rx in patterns.items():
+        if not rx.search(p.get('title') or ''):continue
         ts=s['topics'].setdefault(t,{'years':collections.Counter(),'examples':[]})
         ts['years'][y]+=1
         if y>=2022:keep(ts['examples'],p,5)
