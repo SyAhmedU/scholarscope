@@ -31,6 +31,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;         // cross-origin: untouched
   if (url.pathname.includes('/api/')) return;              // never cache API / auth traffic
+  if (req.cache === 'no-store' || url.searchParams.has('research_refresh')) return; // explicit fresh-reference checks must reach the network
 
   // Navigations: network-first (new deploys show up), cached shell when offline.
   if (req.mode === 'navigate') {
