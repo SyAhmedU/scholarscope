@@ -3,7 +3,7 @@
 // onto a fresh cache. Scope is derived from this worker's own URL, so the same code
 // works at a domain root and under a /<project>/ path.
 const PREFIX = 'syed-pwa-scholarscope-';
-const CACHE = PREFIX + 'v1';
+const CACHE = PREFIX + 'v2-journal-explorer-20261010';
 const ROOT = new URL('./', self.location).href;          // scope root (absolute)
 const SHELL = [ROOT, ROOT + 'manifest.webmanifest', ROOT + 'icon.svg'];
 
@@ -36,8 +36,8 @@ self.addEventListener('fetch', (e) => {
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
-        .then((res) => { const cp = res.clone(); caches.open(CACHE).then((c) => c.put(ROOT, cp)); return res; })
-        .catch(() => caches.match(ROOT).then((r) => r || caches.match(req))),
+        .then((res) => { const cp = res.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); return res; })
+        .catch(() => caches.match(req).then((r) => r || caches.match(ROOT))),
     );
     return;
   }

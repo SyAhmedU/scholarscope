@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-10",
+  "journalId": "30020",
+  "home": "https://onlinelibrary.wiley.com/journal/10991379",
+  "callsSource": "https://onlinelibrary.wiley.com/journal/10991379/call-for-papers",
+  "guidelines": "https://onlinelibrary.wiley.com/page/journal/10991379/homepage/forauthors.html",
+  "earlyView": "https://onlinelibrary.wiley.com/toc/10991379/0/0",
+  "submit": "https://authors.wiley.com/journal/JOB",
+  "metrics": {"year":2025,"firstDecision":17,"acceptance":545,"production":20,"acceptanceRate":5,"source":"https://onlinelibrary.wiley.com/journal/10991379/journal-metrics"},
+  "editor": "Laurie Barclay",
+  "editorSince": "2026-01-01",
+  "scope": "Empirical and theoretical organizational behavior research across individual, team and organizational levels.",
+  "issue": {"label":"Human–AI teamwork","volume":47,"issue":8,"date":"2026-10","status":"Published issue, not an open call","source":"https://onlinelibrary.wiley.com/toc/10991379/2026/47/8"},
+  "calls": [
+    {"id":"change","label":"Rethinking organizational change","kind":"Full paper","open":"2027-01-15","deadline":"2027-02-15","topic":"change","source":"https://onlinelibrary.wiley.com/pb-assets/assets/10991379/cfp/Call-for-Papers-Final-February-2026-1771933001500.pdf","summary":"Study how change actually unfolds and is experienced. The call challenges substituting readiness or attitudes for the change process itself.","question":"When do employees’ perceptions of change diverge from observable changes in work routines?","design":"Proposed design: repeated observations of routines alongside employee accounts; justify temporal spacing and levels of analysis.","risk":"A standard attitudes survey may not address the call’s conceptual challenge. A new longitudinal project may not be ready by February.","route":"empirical"},
+    {"id":"illness","label":"Chronic illness in working life","kind":"Full paper","open":"2027-06-01","deadline":"2027-06-30","topic":"health","source":"https://onlinelibrary.wiley.com/pb-assets/assets/10991379/cfp/Chronic-Illness-at-Work-CFP-1770260985010.pdf","summary":"Investigate ongoing physical illness as an organizational phenomenon, including disclosure, fluctuating symptoms, accommodations and employment relationships.","question":"How does day-to-day variation in symptoms change disclosure and accommodation negotiations at work?","design":"Proposed design: participant-sensitive diary research with interviews; establish access, consent, privacy and a defensible sampling plan first.","risk":"Generic stress or burnout without an underlying chronic condition is outside this call. The PDF also mentions July 1 in prose; its date table and publisher listing end June 30. Confirm with editors; plan for June 30.","route":"empirical","editorialMilestones":[{"label":"First decisions (publisher target)","date":"2027-11"},{"label":"Revision deadline (publisher target)","date":"2028-03"}]},
+    {"id":"arcdi","label":"Review / conceptual idea pitch","kind":"Research proposal","open":"2027-02-15","deadline":"2027-03-14","topic":null,"source":"https://onlinelibrary.wiley.com/pb-assets/assets/10991379/cfp/2026-ARCDI-CFP-1789270489463.pdf","summary":"An eight-page body-text proposal for research not yet begun. Full review or conceptual papers have a separate, year-round route.","question":"Which apparently competing explanations can be reconciled into a useful account of an organizational phenomenon?","design":"Proposed approach: preliminary literature scoping, a clear theoretical tension and a development plan. Do not complete the proposed research before using this pitch route.","risk":"An invitation following proposal review does not guarantee acceptance of the eventual manuscript. The newer call specifies eight pages; the general author page still describes ten.","route":"proposal"},
+    {"id":"guest","label":"Propose a special issue","kind":"Guest-editor proposal","open":"2026-12-01","deadline":"2026-12-31","topic":null,"source":"https://onlinelibrary.wiley.com/journal/10991379/call-for-papers","summary":"A proposal to organize and edit a special issue. This is a different task from submitting your own research paper.","route":"guest"}
+  ],
+  "checks": [
+    "Make the main manuscript anonymous and prepare author details separately.",
+    "Use an unstructured abstract of at most 200 words and no more than five keywords.",
+    "Prepare a data availability statement; explain reuse of a dataset in a transparency table where applicable.",
+    "Disclose substantive AI assistance as required by the journal; authors remain responsible for accuracy.",
+    "Check preprint permission with the editorial office: the current author page asks that manuscripts not be publicly available online. Do not assume a general publisher policy overrides this instruction.",
+    "Read the specific call for its article type, length and deadline; specific newer instructions can differ from the general page."
+  ]
+}
