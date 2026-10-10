@@ -343,7 +343,7 @@ function mk(){
 mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mk);
 })();</script>
 <!-- /SYED-GATE -->
-<link rel="stylesheet" href="product-design.css?v=20260912">
+<link rel="stylesheet" href="product-design.css?v=20261010">
 <!-- SYED-PWA -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -403,7 +403,7 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
       </div>
       <div class="row" style="margin-top:8px">
         <div class="ac">
-          <input class="input" id="fieldSearch" placeholder="…or search any field (e.g. Leadership, Marketing)" autocomplete="off">
+          <input class="input" id="fieldSearch" aria-label="Search research fields" placeholder="…or search any field (e.g. Leadership, Marketing)" autocomplete="off">
           <div class="menu" id="fieldMenu" style="display:none"></div>
         </div>
       </div>
@@ -413,7 +413,7 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
     <!-- Search: entity typeahead -->
     <div id="searchControls" style="display:none">
       <div class="ac">
-        <input class="input" id="entitySearch" placeholder="Search an institution, author, or journal…" autocomplete="off">
+        <input class="input" id="entitySearch" aria-label="Search institutions, authors or journals" placeholder="Search an institution, author, or journal…" autocomplete="off">
         <div class="menu" id="entityMenu" style="display:none"></div>
       </div>
     </div>
@@ -1174,7 +1174,7 @@ function initPublish(){
         <div class="pf-field"><label>Field</label><select class="pf-sel" id="pfField">${fieldOpts}</select></div>
         <div class="pf-field"><label>Min quartile</label><select class="pf-sel" id="pfQ"><option value="">Any</option><option value="Q1">Q1 only</option><option value="Q1,Q2">Q1 or Q2</option></select></div>
         <div class="pf-field"><label>Access</label><select class="pf-sel" id="pfOA"><option value="">Any</option><option value="oa">Open access</option><option value="sub">Subscription</option></select></div>
-        <div class="pf-field"><label>Max wait (days)</label><input class="pf-sel" id="pfMax" type="number" min="7" max="365" placeholder="e.g. 30"></div>
+        <div class="pf-field"><label>Max wait (days)</label><input class="pf-sel" id="pfMax" aria-label="Maximum waiting days" type="number" min="7" max="365" placeholder="e.g. 30"></div>
         <div class="pf-field"><button class="pf-btn" id="pfBtn">Find journals →</button></div>
       </div>
       <div class="pf-cards" id="pfCards"></div>
@@ -1184,7 +1184,7 @@ function initPublish(){
     <div class="pub-sub">${num(PUB.data.length)} journals with first-decision, acceptance-time and acceptance-rate data. Click any row for details and live metrics.</div>
     <div class="pub-bar">
       <div class="row2">
-        <div class="ac" style="flex:1 1 280px;max-width:420px"><input class="input" id="pbSearch" placeholder="Search journal or publisher…" autocomplete="off"></div>
+        <div class="ac" style="flex:1 1 280px;max-width:420px"><input class="input" id="pbSearch" aria-label="Search journals and publishers" placeholder="Search journal or publisher…" autocomplete="off"></div>
         <span class="lbl">Field</span><select class="pub-sort" id="pbFieldSel" style="width:auto;max-width:220px">${fieldOpts}</select>
       </div>
       <div class="row2">
@@ -1198,7 +1198,7 @@ function initPublish(){
       </div>
       <div class="row2">
         <span class="lbl">Max first decision</span>
-        <input class="pub-slider" id="pbSpeed" type="range" min="7" max="120" value="120" style="flex:1;max-width:240px">
+        <input class="pub-slider" id="pbSpeed" aria-label="Maximum estimated turnaround" type="range" min="7" max="120" value="120" style="flex:1;max-width:240px">
         <span class="pub-count" id="pbSpeedVal">Any</span>
         <span style="flex:1"></span>
         <span class="lbl">Sort</span><select class="pub-sort" id="pbSort" style="width:auto">${SORTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
